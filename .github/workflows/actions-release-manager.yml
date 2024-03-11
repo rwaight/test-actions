@@ -55,9 +55,9 @@ jobs:
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
 
       - name: Provide output from release-drafter
         # Run this step if the 'id' output was set in the 'run-release-drafter' step
