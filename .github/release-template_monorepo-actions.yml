@@ -6,13 +6,6 @@ commitish: main
 template: |
  GitHub Actions Monorepo, version $RESOLVED_VERSION
  
- #### New Actions
- - New actions here
- 
- #### Updated Actions
- - Updated actions here
- 
- 
  ## Changes
  
  $CHANGES
@@ -23,6 +16,10 @@ branches:
   - main
 
 categories:
+  - title: 'Actions Updates'
+    labels:
+      - 'impacts:actions'
+    collapse-after: 10
   - title: '🐛 Bug Fixes'
     labels:
       - 'bug'
