@@ -56,7 +56,7 @@ jobs:
       - name: Run rwaight/actions/releases/release-drafter
         #uses: rwaight/actions/releases/release-drafter@v1
         uses: rwaight/actions/releases/release-drafter@main
-        id: run-release-drafter
+        id: draft-release
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
@@ -65,30 +65,63 @@ jobs:
           ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
 
       - name: Provide output from release-drafter
-        # Run this step if the 'id' output was set in the 'run-release-drafter' step
-        if: ${{ steps.run-release-drafter.outputs.id }}
+        # Run this step if the 'id' output was set in the 'draft-release' step
+        if: ${{ steps.draft-release.outputs.id }}
         id: print-release-drafter-outputs
         run: |
          echo "The release drafter step outputs are: "
-         echo "id: ${{ steps.run-release-drafter.outputs.id }}" 
-         echo "name: ${{ steps.run-release-drafter.outputs.name }}" 
-         echo "tag_name: ${{ steps.run-release-drafter.outputs.tag_name }}" 
+         echo "id: ${{ steps.draft-release.outputs.id }}" 
+         echo "name: ${{ steps.draft-release.outputs.name }}" 
+         echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" 
          echo ""
          echo "URLs: "
-         echo "html_url: ${{ steps.run-release-drafter.outputs.html_url }}" 
-         echo "upload_url: ${{ steps.run-release-drafter.outputs.upload_url }}" 
+         echo "html_url: ${{ steps.draft-release.outputs.html_url }}" 
+         echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" 
          echo ""
          echo "Version Info: "
-         echo "major_version: ${{ steps.run-release-drafter.outputs.major_version }}" 
-         echo "minor_version: ${{ steps.run-release-drafter.outputs.minor_version }}" 
-         echo "patch_version: ${{ steps.run-release-drafter.outputs.patch_version }}" 
-         echo "resolved_version: ${{ steps.run-release-drafter.outputs.resolved_version }}" 
+         echo "major_version: ${{ steps.draft-release.outputs.major_version }}" 
+         echo "minor_version: ${{ steps.draft-release.outputs.minor_version }}" 
+         echo "patch_version: ${{ steps.draft-release.outputs.patch_version }}" 
+         echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }}" 
          echo ""
          echo "body: "
-         echo "${{ steps.run-release-drafter.outputs.body }}"
+         echo "${{ steps.draft-release.outputs.body }}"
          echo " === end of body === "
          echo ""
          echo "The 'print-release-drafter-outputs' step is now complete. "
+
+
+      - name: Print draft release instructions and information
+        if: ${{ steps.draft-release.outputs.html_url }}
+        id: print-draft-release
+        run: |
+          echo "::notice title=Draft Release Prepared::A draft release has been prepared for you to review: ${{ steps.draft-release.outputs.html_url }}"
+          echo "### Draft release prepared" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "A draft release has been prepared for you to review. " >> $GITHUB_STEP_SUMMARY
+          echo "- Draft release URL: ${{ steps.draft-release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "<details><summary> Draft release summary (click to expand) </summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "#### Release information " >> $GITHUB_STEP_SUMMARY
+          echo "- ID: \`${{ steps.draft-release.outputs.id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Name: ${{ steps.draft-release.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Tag Name: \`${{ steps.draft-release.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "#### URLs " >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- Release URL: ${{ steps.draft-release.outputs.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Upload URL: ${{ steps.draft-release.outputs.upload_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "#### Version information " >> $GITHUB_STEP_SUMMARY
+          echo "- Major version   : ${{ steps.draft-release.outputs.major_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Minor version   : ${{ steps.draft-release.outputs.minor_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Patch version   : ${{ steps.draft-release.outputs.patch_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Resolved version: ${{ steps.draft-release.outputs.resolved_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
 
       - name: Run workflow debug
         id: run-workflow-debug
@@ -236,8 +269,8 @@ jobs:
           update-minor: true
           skip-repo-setup: true # default is false
           create-release: false # default is true
-        if: github.event.release.prerelease == false
         #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
+        if: github.event.release.prerelease == false
 
   # Run the 'not-repo-owner' job if the repository_owner is not correct
   not-repo-owner:
