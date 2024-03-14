@@ -23,7 +23,8 @@ on:
         required: false
 
 permissions:
-  contents: read
+  #contents: read
+  contents: write
   issues: write
   pull-requests: write
 
