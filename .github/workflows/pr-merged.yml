@@ -5,7 +5,7 @@ run-name: '[autorelease] PR merged'
 on:
   pull_request:
     branches:
-    - main
+      - main
     types: [closed]
 
 permissions:
@@ -61,6 +61,11 @@ jobs:
     - name: Display release notes
       run: |
         echo "${{ steps.get-release-notes.outputs.release-notes }}"
+
+    - name: Note about this workflow
+      run: |
+        echo "Here is where we should actually pass the notes to release-drafter instead of the next step"
+        echo "Unless we do not want to use release-drafter... "
 
     - name: Create Draft Release
       id: create_release
