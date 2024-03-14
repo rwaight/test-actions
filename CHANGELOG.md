@@ -1,5 +1,7 @@
 # Changelog
 
+## [Unreleased]
+
 ## [0.2.1] - 2024-03-14
 
 ### Added
@@ -11,7 +13,7 @@
 
 ### Added
 
-- Add open\_actions example by @rwaight in #4
+- Add `open_actions` example by @rwaight in #4
 
 ### Changed
 
