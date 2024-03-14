@@ -71,32 +71,61 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # https://github.com/release-flow/keep-a-changelog-action
       - name: Get latest release info
-        id: query-release-info
+        id: query-latest-release
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
         with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
           #version: ${{ github.event.inputs.release-type }}
-          version: latest
+          #version: latest
+          version: latest-or-unreleased
 
-      - name: Display release info
+      - name: Print latest release info
+        id: print-latest-release
         run: |
-          echo "$Version: {{ steps.query-release-info.outputs.version }}"
-          echo "$Date: {{ steps.query-release-info.outputs.release-date }}"
-          echo "${{ steps.query-release-info.outputs.release-notes }}"
+          echo "Latest release information: "
+          echo "$Version: {{ steps.query-latest-release.outputs.version }}"
+          echo "$Date: {{ steps.query-latest-release.outputs.release-date }}"
+          echo "${{ steps.query-latest-release.outputs.release-notes }}"
 
+      # https://github.com/release-flow/keep-a-changelog-action
+      - name: Get unreleased changes release info
+        id: query-unreleased-changes
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
+          command: query
+          #version: ${{ github.event.inputs.release-type }}
+          #version: latest
+          version: latest-or-unreleased
+
+      - name: Print unreleased changes info
+        id: print-unreleased-changes
+        run: |
+          echo "Unreleased changes information: "
+          echo "$Version: {{ steps.query-unreleased-changes.outputs.version }}"
+          echo "$Date: {{ steps.query-unreleased-changes.outputs.release-date }}"
+          echo "${{ steps.query-unreleased-changes.outputs.release-notes }}"
+
+      # https://github.com/release-flow/keep-a-changelog-action
       - name: Update changelog
         id: update-changelog
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
         with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
           command: bump
           keep-unreleased-section: true
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
+          fail-on-empty-release-notes: false
 
       - name: Create Pull Request
         id: create-release-pr
