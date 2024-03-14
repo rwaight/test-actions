@@ -50,6 +50,8 @@ jobs:
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
 
       - name: Get the current value of my_custom_version
         id: get-my-custom-version
@@ -70,6 +72,18 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      # maybe use https://github.com/EndBug/add-and-commit instead?
+      # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # user: 'rw-actions-bot <noreply@github.com>'
+      - name: Set up git config
+        id: set-up-git
+        run: |
+          git --version
+          git config user.name "rw-actions-bot"
+          git config user.email "<noreply@github.com>"
+          git status
+          echo "the 'set-up-git' step has completed. "
 
       - name: Get the repo tags information with git
         id: print-repo-tags-with-git
