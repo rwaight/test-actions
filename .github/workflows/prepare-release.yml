@@ -94,6 +94,7 @@ jobs:
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
         with:
           command: bump
+          keep-unreleased-section: true
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
 
