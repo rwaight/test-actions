@@ -69,6 +69,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get latest release info
+        id: query-release-info
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          command: query
+          #version: ${{ github.event.inputs.release-type }}
+          version: latest
+
+      - name: Display release info
+        run: |
+          echo "$Version: {{ steps.query-release-info.outputs.version }}"
+          echo "$Date: {{ steps.query-release-info.outputs.release-date }}"
+          echo "${{ steps.query-release-info.outputs.release-notes }}"
+
       - name: Update changelog
         id: update-changelog
         #uses: ./
@@ -93,7 +109,7 @@ jobs:
           # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
           # contents of the release notes don't get chomped. See https://yaml-multiline.info/
           body: |
-            **This PR was created automatically by the releasebot**
+            **This PR was created automatically by the rw-actions-bot**
 
             **:warning: Approving this PR will trigger a workflow that generates a draft release. You need to publish this release when you are happy with it.**
 
