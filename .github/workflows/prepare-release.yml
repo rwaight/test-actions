@@ -150,7 +150,8 @@ jobs:
             ---
 
             ${{ steps.update-changelog.outputs.release-notes }}
-          labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
+          #labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
+          labels: actions:autorelease, skip-changelog
           #token: ${{ steps.generate-token.outputs.token }}
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
