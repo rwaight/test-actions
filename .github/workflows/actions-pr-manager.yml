@@ -1,0 +1,171 @@
+name: PR Manager
+run-name: Actions Monorepo PR Manager - ${{ github.event_name }}
+on:
+  pull_request:
+    # 'on pull_request' is used by: 'pr-labeler'
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      debug_output:
+        description: 'Debug output'
+        required: true
+        default: false
+        type: boolean
+
+
+jobs:
+  # run 'check-custom-vars', but only: pull_request; or manual (workflow_dispatch);
+  check-custom-vars:
+    name: Check custom variables
+    runs-on: ubuntu-latest
+    if: | 
+      (github.repository_owner == 'rwaight') && (github.event_name == 'pull_request')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout 'my-custom-variables.json' from the commit tree
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          sparse-checkout: |
+            .github
+            my-custom-variables.json
+          #sparse-checkout-cone-mode: true
+          sparse-checkout-cone-mode: false
+
+      - name: Get the current value of my_custom_version
+        id: get-my-custom-version
+        run: |
+          echo "starting the 'get-my-custom-version' step "
+          MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_version my-custom-variables.json)
+          echo "MY_CUSTOM_VERSION: $MY_CUSTOM_VERSION"
+          echo "MY_CUSTOM_VERSION=$MY_CUSTOM_VERSION" >> $GITHUB_ENV
+          echo "MY_CUSTOM_VERSION=$MY_CUSTOM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "completing the 'get-my-custom-version' step "
+
+
+      - name: Get the repo tags information with git
+        id: print-repo-tags-with-git
+        run: |
+          echo "Using git to print tag information"
+          echo "running 'git describe --tags' ... "
+          git describe --tags
+          echo ""
+          echo "running 'git tag -l | tail -1' ... "
+          git tag -l | tail -1
+          echo ""
+          echo "running 'git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7' ... "
+          echo "this will remove the 'v' prefix"
+          git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7
+          echo ""
+          echo "running 'git tag --sort=-taggerdate | tail -1' ... "
+          git tag --sort=-taggerdate | tail -1
+          echo ""
+          echo "running 'git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1' ... "
+          git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1
+          echo ""
+          echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
+          git describe --tags `git rev-list --tags --max-count=1`
+          echo ""
+          echo "running 'git describe --abbrev=0 --tags' ... "
+          git describe --abbrev=0 --tags
+          echo ""
+          echo "capturing the latest-tag from git "
+          latest_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
+          echo "The latest tag in this repo is \`$latest_tag\`"
+          echo "The latest tag in this repo is \`$latest_tag\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo ""
+          echo "The 'print-repo-tags-with-git' step is complete."
+
+      - name: Get the repo release information with the GitHub CLI
+        id: print-release-info-with-cli
+        run: |
+          echo "Using the GitHub CLI to print release information"
+          echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
+          echo "running 'gh release list' ... "
+          gh release list
+          echo ""
+          echo "running 'gh release list --exclude-drafts' ... "
+          gh release list --exclude-drafts
+          echo ""
+          echo "running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
+          gh release list --exclude-drafts --exclude-pre-releases
+          echo ""
+          echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
+          gh release list --exclude-drafts --exclude-pre-releases --limit 1
+          echo ""
+          echo "To learn more about using the GitHub CLI with workflows... "
+          echo "See https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows "
+          echo ""
+          echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
+          gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
+          echo ""
+          echo "capturing the latest-release from the GitHub CLI "
+          latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          echo "The latest release version of this repo is \`$latest_release\`"
+          echo "The latest release version of this repo is \`$latest_release\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo ""
+          echo "The 'print-release-info-with-cli' step is complete."
+        env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      # maybe use https://github.com/EndBug/add-and-commit instead?
+      # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # user: 'rw-actions-bot <noreply@github.com>'
+      - name: Set up git config
+        id: set-up-git
+        run: |
+          git config user.name rw-actions-bot
+          git config user.email <noreply@github.com>
+          echo "the 'set-up-git' step has completed. "
+
+      - name: Add a test file named generated.txt
+        id: add-test-file
+        run: |
+          date > generated.txt
+          git add .
+          git commit -m "Updated generated.txt with the current date"
+          git push
+
+      - name: We should see if my_custom_version matches the latest tag 
+        id: compare-versions
+        run: |
+          echo "Here is where we should see if my_custom_version matches the latest tag ... "
+          echo ""
+          echo "we can update my_custom_version, if it matches the latest tag"
+          echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+          latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          echo "the latest release version is $latest_release"
+          echo "the value of my_custom_version set in my-custom-variables.json is $MY_CUSTOM_VERSION"
+          tmp=$(mktemp)
+          jq '.my_custom_version = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+
+      - name: Bump my_custom_version if it matches the latest tag 
+        id: compare-versions
+        run: |
+          echo "Here are commands to bump the version with bash ... "
+          echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1'
+
+
+      - name: sadf
+        run: |
+          echo "special thanks to this person on stack overflow ... "
+          echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+          tmp=$(mktemp)
+          jq '.my_custom_version = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+
