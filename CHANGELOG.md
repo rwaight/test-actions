@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.1] - 2024-03-14
 
 ### Added
 
@@ -11,7 +11,7 @@
 
 ### Added
 
-- Add open_actions example by @rwaight in #4
+- Add open\_actions example by @rwaight in #4
 
 ### Changed
 
@@ -35,7 +35,12 @@
 
 - Initial draft of the GitHub actions monorepo
 
+[0.2.1]: https://github.com/rwaight/actions/compare/v0.2.0...v0.2.1
+
 [0.2.0]: https://github.com/rwaight/actions/compare/v0.1.2...v0.2.0
+
 [0.1.2]: https://github.com/rwaight/actions/compare/v0.1.1...v0.1.2
+
 [0.1.1]: https://github.com/rwaight/actions/compare/v0.1.0...v0.1.1
+
 [0.1.0]: https://github.com/rwaight/actions/releases/tag/v0.1.0
