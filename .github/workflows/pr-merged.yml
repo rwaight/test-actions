@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout files from commit tree
+      uses: actions/checkout@v4
 
     - name: Get release version
       id: get-release-version
