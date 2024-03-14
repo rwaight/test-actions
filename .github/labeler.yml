@@ -1,4 +1,4 @@
-
+# This configuration is used in the 'label-manager' workflow
 # Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
 
 # Add 'documentation' label to any file changes within 'docs' or 'examples' folders
