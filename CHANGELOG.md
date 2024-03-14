@@ -4,6 +4,13 @@
 
 ## [0.2.2] - 2024-03-14
 
+### Changed
+
+- Archive the actions app token and update the label manager @rwaight (#12)
+- add comments to workflows @rwaight (#11)
+- Add checkout action to triage manager @rwaight (#10)
+- Add comment to labeler config @rwaight (#8)
+
 ## [0.2.1] - 2024-03-14
 
 ### Added
