@@ -36,8 +36,8 @@ jobs:
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
+        #with:
+        #  ref: ${{ github.head_ref }}
 
       # not configuring releasebot at this time
       #     releasebot info:
@@ -81,16 +81,17 @@ jobs:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
           #version: ${{ github.event.inputs.release-type }}
-          #version: latest
-          version: latest-or-unreleased
+          version: latest
 
       - name: Print latest release info
         id: print-latest-release
         run: |
           echo "Latest release information: "
-          echo "$Version: {{ steps.query-latest-release.outputs.version }}"
-          echo "$Date: {{ steps.query-latest-release.outputs.release-date }}"
+          echo "Version: {{ steps.query-latest-release.outputs.version }}"
+          echo "Date: {{ steps.query-latest-release.outputs.release-date }}"
+          echo "Release notes: "
           echo "${{ steps.query-latest-release.outputs.release-notes }}"
+          echo ""
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get unreleased changes release info
@@ -109,12 +110,60 @@ jobs:
         id: print-unreleased-changes
         run: |
           echo "Unreleased changes information: "
-          echo "$Version: {{ steps.query-unreleased-changes.outputs.version }}"
-          echo "$Date: {{ steps.query-unreleased-changes.outputs.release-date }}"
+          echo "Version: {{ steps.query-unreleased-changes.outputs.version }}"
+          echo "Date: {{ steps.query-unreleased-changes.outputs.release-date }}"
+          echo "Release notes: "
           echo "${{ steps.query-unreleased-changes.outputs.release-notes }}"
+          echo ""
 
       # https://github.com/release-flow/keep-a-changelog-action
-      - name: Update changelog
+      - name: Get latest-or-unreleased changes release info
+        id: query-latest-or-unreleased-changes
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
+          command: query
+          #version: ${{ github.event.inputs.release-type }}
+          #version: latest
+          version: latest-or-unreleased
+
+      - name: Print latest-or-unreleased changes info
+        id: print-latest-or-unreleased-changes
+        run: |
+          echo "latest-or-unreleased changes information: "
+          echo "Version: {{ steps.query-latest-or-unreleased-changes.outputs.version }}"
+          echo "Date: {{ steps.query-latest-or-unreleased-changes.outputs.release-date }}"
+          echo "Release notes: "
+          echo "${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}"
+          echo ""
+
+      # https://github.com/release-flow/keep-a-changelog-action
+      - name: Get release-type (${{ github.event.inputs.release-type }}) changes
+        id: query-release-type-changes
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
+          command: query
+          #version: ${{ github.event.inputs.release-type }}
+          #version: latest
+          version: latest-or-unreleased
+
+      - name: Print release-type (${{ github.event.inputs.release-type }}) changes
+        id: print-release-type-changes
+        run: |
+          echo "release-type (${{ github.event.inputs.release-type }}) changes information: "
+          echo "Version: {{ steps.query-release-type-changes.outputs.version }}"
+          echo "Date: {{ steps.query-release-type-changes.outputs.release-date }}"
+          echo "Release notes: "
+          echo "${{ steps.query-release-type-changes.outputs.release-notes }}"
+          echo ""
+
+      # https://github.com/release-flow/keep-a-changelog-action
+      - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
         id: update-changelog
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
@@ -126,6 +175,16 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
+
+      - name: Print output from update-changelog
+        id: print-update-changelog
+        run: |
+          echo "Output from the 'update-changelog' step: "
+          echo "Version: {{ steps.update-changelog.outputs.version }}"
+          echo "Date: {{ steps.update-changelog.outputs.release-date }}"
+          echo "Release notes: "
+          echo "${{ steps.update-changelog.outputs.release-notes }}"
+          echo ""
 
       - name: Create Pull Request
         id: create-release-pr
