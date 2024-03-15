@@ -148,9 +148,9 @@ jobs:
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
-          #version: ${{ github.event.inputs.release-type }}
+          version: ${{ github.event.inputs.release-type }}
           #version: latest
-          version: latest-or-unreleased
+          #version: latest-or-unreleased
 
       - name: Print release-type (${{ github.event.inputs.release-type }}) changes
         id: print-release-type-changes
@@ -161,6 +161,21 @@ jobs:
           echo "Release notes: "
           echo "${{ steps.query-release-type-changes.outputs.release-notes }}"
           echo ""
+
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Update Changelog
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          release-notes: ${{ github.event.release.body }}
+          latest-version: ${{ github.event.release.name }}
+
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Commit updated CHANGELOG
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: Update CHANGELOG
+          file_pattern: CHANGELOG.md
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
