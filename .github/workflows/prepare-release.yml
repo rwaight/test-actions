@@ -167,7 +167,8 @@ jobs:
         id: update-changelog
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
-        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: release-flow/keep-a-changelog-action@v3.0.0
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
           command: bump
