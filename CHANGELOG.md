@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.0] - 2024-03-15
 
 ## [0.2.2] - 2024-03-14
 
@@ -46,7 +46,7 @@
 
 - Initial draft of the GitHub actions monorepo
 
-[Unreleased]: https://github.com/rwaight/actions/compare/v0.2.2...HEAD
+[0.3.0]: https://github.com/rwaight/actions/compare/v0.2.2...v0.3.0
 
 [0.2.2]: https://github.com/rwaight/actions/compare/v0.2.1...v0.2.2
 
