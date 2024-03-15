@@ -140,6 +140,7 @@ jobs:
         id: notice-about-changelog
         run: |
           echo "Need to actually write to the unreleased section of the changelog here. "
+          echo "might need to look at https://github.com/heinrichreimer/action-github-changelog-generator"
 
       # https://github.com/stefanzweifel/changelog-updater-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
@@ -155,7 +156,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: 'autorelease/${{ steps.query-unreleased-changes.outputs.version }}'
-          commit_message: Update CHANGELOG
+          commit_message: Update CHANGELOG for ${{ steps.query-unreleased-changes.outputs.version }}
           file_pattern: CHANGELOG.md
 
       # https://github.com/release-flow/keep-a-changelog-action
