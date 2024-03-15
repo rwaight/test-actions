@@ -36,8 +36,8 @@ jobs:
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
-        #with:
-        #  ref: ${{ github.head_ref }}
+        with:
+          ref: ${{ github.head_ref }}
 
       # not configuring releasebot at this time
       #     releasebot info:
@@ -171,7 +171,9 @@ jobs:
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
           command: bump
-          keep-unreleased-section: true
+          #keep-unreleased-section: true
+          # commenting out 'keep-unreleased-section: true' because the release-notes have been blank
+          # might have to try the 'fail-on-empty-release-notes' option next
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
