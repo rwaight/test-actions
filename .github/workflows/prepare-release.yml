@@ -112,6 +112,7 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get unreleased changes release info
         id: query-unreleased-changes
+        continue-on-error: true
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
@@ -119,6 +120,7 @@ jobs:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
           version: unreleased
+          changelog: prepare-template-CHANGELOG.md
 
       - name: Print unreleased changes info
         id: print-unreleased-changes
@@ -163,25 +165,26 @@ jobs:
 
       # https://github.com/stefanzweifel/changelog-updater-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 01 - Update Changelog
-        id: try-01-update-changelog
+      - name: Try 01 - Update changelog with stefanzweifel/changelog-updater-action
+        id: attempt01-update-changelog
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           release-notes: ${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}
           latest-version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          path-to-changelog: set1-attempt01-CHANGELOG.md
 
-      - name: Try 01 - Show CHANGELOG content
-        run: cat CHANGELOG.md
+      - name: Try 01 - Show set1-attempt01-CHANGELOG content
+        run: cat set1-attempt01-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 01 - Commit updated CHANGELOG
-        id: try-01-commit-changelog
+      - name: Try 01 - Commit updated set1-attempt01-CHANGELOG
+        id: attempt01-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          commit_message: Update CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
-          file_pattern: CHANGELOG.md
+          commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          file_pattern: set1-attempt01-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
@@ -192,7 +195,7 @@ jobs:
         run: ls -R
 
       # https://github.com/heinrichreimer/action-github-changelog-generator
-      - name: "Run action-github-changelog-generator"
+      - name: Try 02 - Build a custom changelog with mikepenz/release-changelog-builder-action
         id: try-02-update-changelog
         continue-on-error: true
         uses: heinrichreimer/action-github-changelog-generator@v2.3
@@ -200,22 +203,22 @@ jobs:
           # https://github.com/heinrichreimer/action-github-changelog-generator?tab=readme-ov-file#inputs
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
-          output: TEST-CHANGELOG.md  # default is 'CHANGELOG.md'
+          output: set1-attempt02-CHANGELOG.md  # default is 'CHANGELOG.md'
           user: rw-actions-bot
 
-      - name: Try 02 - Show TEST-CHANGELOG content
-        run: cat TEST-CHANGELOG.md
+      - name: Try 02 - Show set1-attempt02-CHANGELOG content
+        run: cat set1-attempt02-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 02 - Commit updated TEST-CHANGELOG
+      - name: Try 02 - Commit updated set1-attempt02-CHANGELOG
         id: try-02-commit-changelog
         continue-on-error: true
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          commit_message: Update TEST-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
-          file_pattern: TEST-CHANGELOG.md
+          commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          file_pattern: set1-attempt02-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
@@ -242,6 +245,7 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
+          changelog: set1-attempt03-CHANGELOG.md
 
       - name: Try 03 - File structure before stefanzweifel/changelog-updater-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
@@ -249,25 +253,26 @@ jobs:
 
       # https://github.com/stefanzweifel/changelog-updater-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 03 - Update Changelog
+      - name: Try 03 - Update changelog with stefanzweifel/changelog-updater-action
         id: try-03-update-changelog
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           release-notes: ${{ steps.get-next-version.outputs.release-notes }}
           latest-version: ${{ steps.get-next-version.outputs.version }}
+          path-to-changelog: set1-attempt03-CHANGELOG.md
 
-      - name: Try 03 - Show CHANGELOG content
-        run: cat CHANGELOG.md
+      - name: Try 03 - Show set1-attempt03-CHANGELOG content
+        run: cat set1-attempt03-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 03 - Commit updated CHANGELOG
+      - name: Try 03 - Commit updated set1-attempt03-CHANGELOG.md
         id: try-03-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          commit_message: Update CHANGELOG for ${{ steps.get-next-version.outputs.version }}
-          file_pattern: CHANGELOG.md
+          commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          file_pattern: set1-attempt03-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
@@ -278,7 +283,7 @@ jobs:
         run: ls -R
 
       # https://github.com/heinrichreimer/action-github-changelog-generator
-      - name: Try 04 - Run action-github-changelog-generator
+      - name: Try 04 - Run heinrichreimer/action-github-changelog-generator
         id: try-04-update-changelog
         continue-on-error: true
         uses: heinrichreimer/action-github-changelog-generator@v2.3
@@ -286,11 +291,11 @@ jobs:
           # https://github.com/heinrichreimer/action-github-changelog-generator?tab=readme-ov-file#inputs
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
-          output: TEST-CHANGELOG.md  # default is 'CHANGELOG.md'
+          output: set1-attempt04-CHANGELOG.md  # default is 'CHANGELOG.md'
           user: rw-actions-bot
 
-      - name: Try 04 - Show TEST-CHANGELOG content
-        run: cat TEST-CHANGELOG.md
+      - name: Try 04 - Show set1-attempt04-CHANGELOG content
+        run: cat set1-attempt04-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
@@ -300,8 +305,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          commit_message: Update TEST-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
-          file_pattern: TEST-CHANGELOG.md
+          commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          file_pattern: set1-attempt04-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
