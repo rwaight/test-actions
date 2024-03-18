@@ -30,9 +30,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  changelog:
+  trash-changelog:
     name: Update changelog and create PR
     runs-on: ubuntu-latest
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
@@ -47,8 +49,21 @@ jobs:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         with:
+          fetch-depth: '0'
           ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
+
+      # maybe use https://github.com/EndBug/add-and-commit instead?
+      # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # user: 'rw-actions-bot <noreply@github.com>'
+      - name: Set up git config
+        id: set-up-git
+        run: |
+          git --version
+          git config user.name "rw-actions-bot"
+          git config user.email "<noreply@github.com>"
+          git status
+          echo "the 'set-up-git' step has completed. "
 
       # not configuring releasebot at this time
       #     releasebot info:
@@ -142,28 +157,62 @@ jobs:
           echo "Need to actually write to the unreleased section of the changelog here. "
           echo "might need to look at https://github.com/heinrichreimer/action-github-changelog-generator"
 
+      - name: Try 01 - File structure before stefanzweifel/changelog-updater-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
       # https://github.com/stefanzweifel/changelog-updater-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Update Changelog
-        id: try-to-update-changelog
+      - name: Try 01 - Update Changelog
+        id: try-01-update-changelog
         uses: stefanzweifel/changelog-updater-action@v1
         with:
-          release-notes: ${{ steps.query-unreleased-changes.outputs.release-notes }}
-          latest-version: ${{ steps.query-unreleased-changes.outputs.version }}
+          release-notes: ${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}
+          latest-version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Commit updated CHANGELOG
-        id: try-to-commit-changelog
+      - name: Try 01 - Commit updated CHANGELOG
+        id: try-01-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/${{ steps.query-unreleased-changes.outputs.version }}'
-          commit_message: Update CHANGELOG for ${{ steps.query-unreleased-changes.outputs.version }}
+          branch: 'autorelease/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
+          commit_message: Update CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
           file_pattern: CHANGELOG.md
 
+      - name: Try 01 - File structure after stefanzweifel/git-auto-commit-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # https://github.com/heinrichreimer/action-github-changelog-generator
+      - name: "Run action-github-changelog-generator"
+        id: try-02-update-changelog
+        continue-on-error: true
+        uses: heinrichreimer/action-github-changelog-generator@v2.3
+        with:
+          # https://github.com/heinrichreimer/action-github-changelog-generator?tab=readme-ov-file#inputs
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          output: TEST-CHANGELOG.md  # default is 'CHANGELOG.md'
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 02 - Commit updated TEST-CHANGELOG
+        id: try-02-commit-changelog
+        continue-on-error: true
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
+          commit_message: Update TEST-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          file_pattern: TEST-CHANGELOG.md
+
+      - name: Try 02 - File structure after stefanzweifel/git-auto-commit-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
       # https://github.com/release-flow/keep-a-changelog-action
-      - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
-        id: update-changelog
+      - name: Get next version using inputs.release-type (${{ github.event.inputs.release-type }})
+        id: get-next-version
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
@@ -179,14 +228,72 @@ jobs:
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
 
-      - name: Print output from update-changelog
-        id: print-update-changelog
+      - name: Try 03 - File structure before stefanzweifel/changelog-updater-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # https://github.com/stefanzweifel/changelog-updater-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 03 - Update Changelog
+        id: try-03-update-changelog
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          release-notes: ${{ steps.get-next-version.outputs.release-notes }}
+          latest-version: ${{ steps.get-next-version.outputs.version }}
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 03 - Commit updated CHANGELOG
+        id: try-03-commit-changelog
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ steps.get-next-version.outputs.version }}'
+          commit_message: Update CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          file_pattern: CHANGELOG.md
+
+      - name: Try 03 - File structure after stefanzweifel/git-auto-commit-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # https://github.com/heinrichreimer/action-github-changelog-generator
+      - name: Try 04 - Run action-github-changelog-generator
+        id: try-04-update-changelog
+        continue-on-error: true
+        uses: heinrichreimer/action-github-changelog-generator@v2.3
+        with:
+          # https://github.com/heinrichreimer/action-github-changelog-generator?tab=readme-ov-file#inputs
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          output: TEST-CHANGELOG.md  # default is 'CHANGELOG.md'
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 04 - Commit updated TEST-CHANGELOG
+        id: try-04-commit-changelog
+        continue-on-error: true
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ steps.get-next-version.outputs.version }}'
+          commit_message: Update TEST-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          file_pattern: TEST-CHANGELOG.md
+
+      - name: Try 04 - File structure after stefanzweifel/git-auto-commit-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+
+      - name: Debug - File structure after 'bump' using release-flow/keep-a-changelog-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      - name: Print output from get-next-version
+        id: print-get-next-version
         run: |
-          echo "Output from the 'update-changelog' step: "
-          echo "Version: ${{ steps.update-changelog.outputs.version }}"
-          echo "Date: ${{ steps.update-changelog.outputs.release-date }}"
+          echo "Output from the 'get-next-version' step: "
+          echo "Version: ${{ steps.get-next-version.outputs.version }}"
+          echo "Date: ${{ steps.get-next-version.outputs.release-date }}"
           echo "Release notes: "
-          echo "${{ steps.update-changelog.outputs.release-notes }}"
+          echo "${{ steps.get-next-version.outputs.release-notes }}"
           echo ""
 
       - name: Print notice that no pr is being created
