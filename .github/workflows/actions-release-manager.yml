@@ -354,12 +354,16 @@ jobs:
 
       # https://github.com/stefanzweifel/changelog-updater-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
-      - name: Try 01 - Update Changelog
+      - name: Try 01 - Update changelog from release-drafter with stefanzweifel/changelog-updater-action
         id: try-01-update-changelog
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           release-notes: ${{ needs.update-release-draft.outputs.body }}
           latest-version: ${{ needs.update-release-draft.outputs.resolved_version }}
+          path-to-changelog: try01-CHANGELOG.md
+
+      - name: Try 01 - Show try01-CHANGELOG content
+        run: cat try01-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
@@ -369,7 +373,7 @@ jobs:
         with:
           branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
           commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
-          file_pattern: CHANGELOG.md
+          file_pattern: try01-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
@@ -378,6 +382,37 @@ jobs:
       - name: Try 01 - File structure after stefanzweifel/git-auto-commit-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
         run: ls -R
+
+      # https://github.com/mikepenz/release-changelog-builder-action
+      - name: Try 02 - Build a custom changelog with mikepenz/release-changelog-builder-action
+        id: try-02-update-changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          ignorePreReleases: "false"   # default is 'false'
+          outputFile: try02-CHANGELOG.md
+          #fetchReleaseInformation: true   # default is 'false'
+          # we may need to use 'fetchViaCommits', but looks like
+          # we will also need to include the 'fromTag' and 'toTag' options
+
+      - name: Try 02 - Show try02-CHANGELOG content
+        run: cat try02-CHANGELOG.md
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 02 - Commit updated CHANGELOG
+        id: try-02-commit-changelog
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
+          commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
+          file_pattern: try02-CHANGELOG.md
+          create_branch: true
+          commit_options: '--signoff'
+          commit_user_name: rw-actions-bot
+          commit_user_email: noreply@github.com
 
       - name: Print notice that no pr is being created
         id: print-notice-no-pr
