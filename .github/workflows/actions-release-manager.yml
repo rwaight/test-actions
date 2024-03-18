@@ -360,10 +360,10 @@ jobs:
         with:
           release-notes: ${{ needs.update-release-draft.outputs.body }}
           latest-version: ${{ needs.update-release-draft.outputs.resolved_version }}
-          path-to-changelog: try01-CHANGELOG.md
+          path-to-changelog: release-manager-try01-CHANGELOG.md
 
-      - name: Try 01 - Show try01-CHANGELOG content
-        run: cat try01-CHANGELOG.md
+      - name: Try 01 - Show release-manager-try01-CHANGELOG content
+        run: cat release-manager-try01-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
@@ -373,7 +373,7 @@ jobs:
         with:
           branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
           commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
-          file_pattern: try01-CHANGELOG.md
+          file_pattern: release-manager-try01-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
@@ -392,13 +392,13 @@ jobs:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
           ignorePreReleases: "false"   # default is 'false'
-          outputFile: try02-CHANGELOG.md
+          outputFile: release-manager-try02-CHANGELOG.md
           #fetchReleaseInformation: true   # default is 'false'
           # we may need to use 'fetchViaCommits', but looks like
           # we will also need to include the 'fromTag' and 'toTag' options
 
-      - name: Try 02 - Show try02-CHANGELOG content
-        run: cat try02-CHANGELOG.md
+      - name: Try 02 - Show release-manager-try02-CHANGELOG content
+        run: cat release-manager-try02-CHANGELOG.md
 
       # https://github.com/stefanzweifel/git-auto-commit-action
       # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
@@ -408,7 +408,7 @@ jobs:
         with:
           branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
           commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
-          file_pattern: try02-CHANGELOG.md
+          file_pattern: release-manager-try02-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
           commit_user_name: rw-actions-bot
