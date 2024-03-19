@@ -8,15 +8,15 @@ on:
       - opened
       # - labeled # consider using 'labeled' if auto assignments are configured with the 'actions/add-to-project' action
       - transferred
-  pull_request:
-    # 'on pull_request' is used by: 'pr-labeler'
-    branches: [main]
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - labeled
-      - unlabeled
+  # pull_request:
+  #   # 'on pull_request' is used by: 'pr-labeler'
+  #   branches: [main]
+  #   types:
+  #     - opened
+  #     - synchronize
+  #     - reopened
+  #     - labeled
+  #     - unlabeled
   workflow_dispatch:
     inputs:
       triage_issues:
@@ -35,73 +35,88 @@ on:
 
 
 jobs:
-  pr-labeler:
-    name: Label pull requests
-    runs-on: ubuntu-latest
-    if: | 
-      (github.repository_owner == 'rwaight') && (github.event_name == 'pull_request')
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      # https://github.com/actions/create-github-app-token
-      - name: Creating a GitHub App Token from actions/create-github-app-token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
-        id: app-token
-        with:
-          # required
-          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+  # pr-labeler:
+  #   name: Label pull requests
+  #   runs-on: ubuntu-latest
+  #   if: | 
+  #     (github.repository_owner == 'rwaight') && (github.event_name == 'pull_request')
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #   steps:
+  #     # https://github.com/actions/create-github-app-token
+  #     - name: Creating a GitHub App Token from actions/create-github-app-token
+  #       #uses: actions/create-github-app-token@v1
+  #       uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+  #       id: app-token
+  #       with:
+  #         # required
+  #         app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+  #         private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
-      - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+  #     - name: Checkout files from commit tree
+  #       uses: actions/checkout@v4
 
-      - name: Apply non-versioning labels
-        id: label-pull-request
-        uses: actions/labeler@v5
-        with:
-          repo-token: ${{ steps.app-token.outputs.token }}
+  #     - name: Apply non-versioning labels
+  #       id: label-pull-request
+  #       uses: actions/labeler@v5
+  #       with:
+  #         repo-token: ${{ steps.app-token.outputs.token }}
 
-      - name: Check for semantic version labels
-        #uses: docker://agilepathway/pull-request-label-checker:latest
-        uses: rwaight/actions/github/label-checker@main # can use version specific or main
-        #uses: rwaight/actions/github/label-checker@v1
-        id: check-semver-labels
-        with:
-          prefix_mode: true
-          one_of: "version:"
-          #none_of: "skip-changelog"
-          allow_failure: true
-          #repo_token: ${{ secrets.GITHUB_TOKEN }}
-          repo_token: ${{ steps.app-token.outputs.token }}
+  #     - name: Check for semantic version labels
+  #       #uses: docker://agilepathway/pull-request-label-checker:latest
+  #       uses: rwaight/actions/github/label-checker@main # can use version specific or main
+  #       #uses: rwaight/actions/github/label-checker@v1
+  #       id: check-semver-labels
+  #       with:
+  #         prefix_mode: true
+  #         one_of: "version:"
+  #         #none_of: "skip-changelog"
+  #         allow_failure: true
+  #         #repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         repo_token: ${{ steps.app-token.outputs.token }}
 
-      - name: Apply the 'triage:version-needed' label to a pull request
-        uses: actions/github-script@v6
-        if: steps.check-semver-labels.outputs.label_check != 'success'
-        with:
-          github-token: ${{ steps.app-token.outputs.token }}
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['triage:version-needed']
-            })
+  #     - name: Apply the 'triage:version-needed' label to a pull request
+  #       uses: actions/github-script@v6
+  #       if: steps.check-semver-labels.outputs.label_check != 'success'
+  #       with:
+  #         github-token: ${{ steps.app-token.outputs.token }}
+  #         script: |
+  #           github.rest.issues.addLabels({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             labels: ['triage:version-needed']
+  #           })
 
-      # Fail the workflow because the proper version label has not been applied
-      - name: Error - Missing proper 'version:' label
-        id: labeler-force-failure
-        if: steps.check-semver-labels.outputs.label_check != 'success'
-        run: |
-          echo "Running 'check-semver-labels' failed! The outcome was ${{ steps.check-semver-labels.outputs.label_check }} ."
-          echo ""
-          echo "::group::check-semver-labels information"
-          echo "The pull request must have one of the 'version:' labels applied. "
-          echo "::endgroup::"
-          ##
-          echo "::error file=actions-triage-manager.yml::check-semver-labels error"
-          exit 1
+  #     - name: Remove the 'triage:version-needed' label from a pull request
+  #       uses: actions/github-script@v6
+  #       if: |
+  #         steps.check-semver-labels.outputs.label_check == 'success' && 
+  #         contains(github.event.pull_request.labels.*.name, 'triage:version-needed')
+  #       with:
+  #         github-token: ${{ steps.app-token.outputs.token }}
+  #         script: |
+  #           github.rest.issues.removeLabel({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             labels: ['triage:version-needed']
+  #           })
+
+  #     # Fail the workflow because the proper version label has not been applied
+  #     - name: Error - Missing proper 'version:' label
+  #       id: labeler-force-failure
+  #       if: steps.check-semver-labels.outputs.label_check != 'success'
+  #       run: |
+  #         echo "Running 'check-semver-labels' failed! The outcome was ${{ steps.check-semver-labels.outputs.label_check }} ."
+  #         echo ""
+  #         echo "::group::check-semver-labels information"
+  #         echo "The pull request must have one of the 'version:' labels applied. "
+  #         echo "::endgroup::"
+  #         ##
+  #         echo "::error file=actions-triage-manager.yml::check-semver-labels error"
+  #         exit 1
 
   # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
   stale-issue-and-pr:

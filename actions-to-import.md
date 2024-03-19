@@ -25,6 +25,7 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`InsonusK/get-latest-release`](https://github.com/InsonusK/get-latest-release)
     - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
 - **git**
+    - [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
     - [`mdomke/git-semver`](https://github.com/mdomke/git-semver)
     - [`actions-ecosystem/action-get-latest-tag`](https://github.com/actions-ecosystem/action-get-latest-tag)
     - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
