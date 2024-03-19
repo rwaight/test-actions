@@ -22,11 +22,32 @@ on:
   # 'on workflow_dispatch' is used conditionally by different jobs
   workflow_dispatch:
     inputs:
+      update_changelog:
+        description: 'Update changelog'
+        required: true
+        default: false
+        type: boolean
       update_release_draft:
         description: 'Update release draft'
         required: true
         default: false
         type: boolean
+      # # this 'release-type' input will be used in a separate job that will create a release PR or something
+      # release-type:
+      #   description: 'Release type'
+      #   type: choice
+      #   required: true
+      #   #required: false
+      #   options:
+      #     - none
+      #     - major
+      #     - minor
+      #     - patch
+      #     #- premajor
+      #     #- preminor
+      #     #- prepatch
+      #     - prerelease
+      #   default: none
       debug_output:
         description: 'Debug output'
         required: true
@@ -41,12 +62,24 @@ jobs:
     if: | 
       (github.repository_owner == 'rwaight') && ( 
       (github.event_name=='workflow_dispatch' && inputs.update_release_draft==true) ||
+      (github.event_name=='workflow_dispatch' && inputs.update_changelog==true) ||
       (github.event.pull_request.merged == true)
       )
     # previously, when including 'push' to 'main' caused two release drafts to be created
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    outputs:
+      id: ${{ steps.draft-release.outputs.id }}
+      name: ${{ steps.draft-release.outputs.name }}
+      tag_name: ${{ steps.draft-release.outputs.tag_name }}
+      html_url: ${{ steps.draft-release.outputs.html_url }}
+      upload_url: ${{ steps.draft-release.outputs.upload_url }}
+      major_version: ${{ steps.draft-release.outputs.major_version }}
+      minor_version: ${{ steps.draft-release.outputs.minor_version }}
+      patch_version: ${{ steps.draft-release.outputs.patch_version }}
+      resolved_version: ${{ steps.draft-release.outputs.resolved_version }}
+      body: ${{ steps.draft-release.outputs.body }}
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
@@ -80,8 +113,8 @@ jobs:
         id: set-up-git
         run: |
           git --version
-          git config user.name rw-actions-bot
-          git config user.email <noreply@github.com>
+          git config user.name "rw-actions-bot"
+          git config user.email "<noreply@github.com>"
           git status
           echo "the 'set-up-git' step has completed. "
 
@@ -235,6 +268,156 @@ jobs:
           echo "The 'run-workflow-debug' step is now complete. "
         continue-on-error: true
 
+  # run 'update-changelog', but only: manual (workflow_dispatch); or closed pull_request; 
+  update-changelog:
+    name: Update changelog
+    runs-on: ubuntu-latest
+    if: | 
+      (github.repository_owner == 'rwaight') && ( 
+      (github.event_name=='workflow_dispatch' && inputs.update_changelog==true) ||
+      (github.event.pull_request.merged == true)
+      ) && (${{ needs.update-release-draft.outputs.id }})
+    # previously, when including 'push' to 'main' caused two release drafts to be created
+    #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
+    needs: [update-release-draft]
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      # maybe use https://github.com/EndBug/add-and-commit instead?
+      # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # user: 'rw-actions-bot <noreply@github.com>'
+      - name: Set up git config
+        id: set-up-git
+        run: |
+          git --version
+          git config user.name "rw-actions-bot"
+          git config user.email "<noreply@github.com>"
+          git status
+          echo "the 'set-up-git' step has completed. "
+
+      - name: Print output from 'update-release-draft' job
+        id: print-draft-release-outputs
+        run: |
+          echo "Draft release information: "
+          echo "id: ${{ needs.update-release-draft.outputs.id }}" 
+          echo "name: ${{ needs.update-release-draft.outputs.name }}" 
+          echo "tag_name: ${{ needs.update-release-draft.outputs.tag_name }}" 
+          echo ""
+          echo "URLs: "
+          echo "html_url: ${{ needs.update-release-draft.outputs.html_url }}" 
+          echo "upload_url: ${{ needs.update-release-draft.outputs.upload_url }}" 
+          echo ""
+          echo "Version Info: "
+          echo "major_version: ${{ needs.update-release-draft.outputs.major_version }}" 
+          echo "minor_version: ${{ needs.update-release-draft.outputs.minor_version }}" 
+          echo "patch_version: ${{ needs.update-release-draft.outputs.patch_version }}" 
+          echo "resolved_version: ${{ needs.update-release-draft.outputs.resolved_version }}" 
+          echo ""
+          echo "body: "
+          echo "${{ needs.update-release-draft.outputs.body }}"
+          echo " === end of body === "
+          echo ""
+          echo "The 'print-release-drafter-outputs' step is now complete. "
+
+      - name: 'Ensure actions:autorelease label exists'
+        run: |
+          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'actions:autorelease' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
+          else
+            echo "the 'actions:autorelease' label exists"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/stefanzweifel/changelog-updater-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 01 - Update changelog from release-drafter with stefanzweifel/changelog-updater-action
+        id: try-01-update-changelog
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          release-notes: ${{ needs.update-release-draft.outputs.body }}
+          latest-version: ${{ needs.update-release-draft.outputs.resolved_version }}
+          path-to-changelog: release-manager-try01-CHANGELOG.md
+
+      - name: Try 01 - Show release-manager-try01-CHANGELOG content
+        run: cat release-manager-try01-CHANGELOG.md
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 01 - Commit updated CHANGELOG
+        id: try-01-commit-changelog
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
+          commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
+          file_pattern: release-manager-try01-CHANGELOG.md
+          create_branch: true
+          commit_options: '--signoff'
+          commit_user_name: rw-actions-bot
+          commit_user_email: noreply@github.com
+
+      - name: Try 01 - File structure after stefanzweifel/git-auto-commit-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # https://github.com/mikepenz/release-changelog-builder-action
+      - name: Try 02 - Build a custom changelog with mikepenz/release-changelog-builder-action
+        id: try-02-update-changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          ignorePreReleases: "false"   # default is 'false'
+          outputFile: release-manager-try02-CHANGELOG.md
+          #fetchReleaseInformation: true   # default is 'false'
+          # we may need to use 'fetchViaCommits', but looks like
+          # we will also need to include the 'fromTag' and 'toTag' options
+
+      - name: Try 02 - Show release-manager-try02-CHANGELOG content
+        run: cat release-manager-try02-CHANGELOG.md
+
+      # https://github.com/stefanzweifel/git-auto-commit-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Try 02 - Commit updated CHANGELOG
+        id: try-02-commit-changelog
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: 'autorelease/${{ needs.update-release-draft.outputs.resolved_version }}'
+          commit_message: Update CHANGELOG for ${{ needs.update-release-draft.outputs.resolved_version }}
+          file_pattern: release-manager-try02-CHANGELOG.md
+          create_branch: true
+          commit_options: '--signoff'
+          commit_user_name: rw-actions-bot
+          commit_user_email: noreply@github.com
+
+      - name: Print notice that no pr is being created
+        id: print-notice-no-pr
+        run: |
+          echo "::notice title=Release PR NOT Prepared::A release PR WAS NOT created, please review the output of the workflow"
 
   # run 'update-tags-on-release', but only when a release is published
   update-tags-on-release:
