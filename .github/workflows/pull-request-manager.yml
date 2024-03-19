@@ -12,12 +12,12 @@ on:
       - labeled
       - unlabeled
   workflow_dispatch:
-    inputs:
-      debug_output:
-        description: 'Debug output'
-        required: true
-        default: false
-        type: boolean
+    # inputs:
+    #   debug_output:
+    #     description: 'Debug output'
+    #     required: true
+    #     default: false
+    #     type: boolean
 
 
 
@@ -88,7 +88,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ['triage:version-needed']
+              name: 'triage:version-needed'
             })
 
       # Fail the workflow because the proper version label has not been applied
