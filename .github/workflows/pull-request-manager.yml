@@ -1,6 +1,6 @@
 # This workflow currently runs the 'pr-labeler' action
-name: PR Manager
-run-name: Pull Request Manager - ${{ github.event_name }}
+name: Test PR Manager
+run-name: Run PR Manager on ${{ github.event_name }}
 on:
   pull_request:
     # 'on pull_request' is used by: 'pr-labeler'
@@ -52,7 +52,8 @@ jobs:
 
       - name: Check for semantic version labels
         #uses: docker://agilepathway/pull-request-label-checker:latest
-        uses: rwaight/actions/github/label-checker@main # can use version specific or main
+        uses: rwaight/actions/test/check-semver-labels@main
+        #uses: rwaight/actions/github/label-checker@main # can use version specific or main
         #uses: rwaight/actions/github/label-checker@v1
         id: check-semver-labels
         with:
@@ -61,7 +62,9 @@ jobs:
           #none_of: "skip-changelog"
           allow_failure: true
           #repo_token: ${{ secrets.GITHUB_TOKEN }}
-          repo_token: ${{ steps.app-token.outputs.token }}
+          #repo_token: ${{ steps.app-token.outputs.token }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+          my_action_debug: true
 
       - name: Apply the 'triage:version-needed' label to a pull request
         uses: actions/github-script@v6
