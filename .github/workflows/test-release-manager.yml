@@ -1,8 +1,8 @@
 # This workflow runs specific workflows based on condition and/or user input:
 # 'Release Drafter' and 'Update Tags on Release'
 # The 'prepare-release' workflow should be moved into this workflow
-name: Release Manager
-run-name: Actions Monorepo Release Manager
+name: Test Release Manager
+run-name: Run Release Manager on ${{ github.event_name }}
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
   # push:  # 'on push' is used by: 'update-release-draft'
@@ -60,11 +60,9 @@ jobs:
     name: Update release draft
     runs-on: ubuntu-latest
     if: | 
-      (github.repository_owner == 'rwaight') && ( 
       (github.event_name=='workflow_dispatch' && inputs.update_release_draft==true) ||
       (github.event_name=='workflow_dispatch' && inputs.update_changelog==true) ||
       (github.event.pull_request.merged == true)
-      )
     # previously, when including 'push' to 'main' caused two release drafts to be created
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
     env:
@@ -81,10 +79,19 @@ jobs:
       resolved_version: ${{ steps.draft-release.outputs.resolved_version }}
       body: ${{ steps.draft-release.outputs.body }}
     steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
+          fetch-tags: 'true'
 
       - name: Get the current value of my_custom_version
         id: get-my-custom-version
@@ -552,16 +559,3 @@ jobs:
         #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
         if: github.event.release.prerelease == false
 
-  # Run the 'not-repo-owner' job if the repository_owner is not correct
-  not-repo-owner:
-    name: Print a random note
-    runs-on: ubuntu-latest
-    if: (github.repository_owner != 'rwaight')
-    env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
-    steps:
-      - name: Print a message based on a condition
-        id: print-message
-        run: |
-          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo ""
