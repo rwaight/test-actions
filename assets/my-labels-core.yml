@@ -158,11 +158,6 @@
   color: 'F9D0C4'
   description: 'Determined to have no priority; none at all.'
   aliases: []
--
-  name: 'triage:priority-needed'
-  color: 'E17668'
-  description: 'Need to have the priority determined'
-  aliases: []
 #
 ##### triage: labels
 # The triage: labels have not been formally defined
@@ -170,6 +165,11 @@
   name: 'triage:needs-assigned'
   color: 'E17668'
   description: 'Needs to be assigned'
+  aliases: []
+-
+  name: 'triage:priority-needed'
+  color: 'E17668'
+  description: 'Need to have the priority determined'
   aliases: []
 -
   name: 'triage:stale'
