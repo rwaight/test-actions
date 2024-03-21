@@ -63,8 +63,7 @@ jobs:
 
       - name: Check for semantic version labels
         #uses: docker://agilepathway/pull-request-label-checker:latest
-        #uses: rwaight/actions/test/check-semver-labels@main
-        uses: rwaight/actions/test/check-semver-labels@feat-update-check-semver-labels
+        uses: rwaight/actions/test/check-semver-labels@main
         #uses: rwaight/actions/github/label-checker@main # can use version specific or main
         #uses: rwaight/actions/github/label-checker@v1
         id: check-semver-labels
