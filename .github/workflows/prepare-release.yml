@@ -240,7 +240,10 @@ jobs:
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           release-notes: ${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}
-          latest-version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          #latest-version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          # this step was erroring out based on the 'version' output from 'query-latest-or-unreleased-changes'
+          #   see https://github.com/rwaight/test-actions/actions/runs/8696137640/job/23848728260
+          latest-version: ${{ steps.get-next-semver.outputs.next-release-version }}
           path-to-changelog: set1-attempt01-CHANGELOG.md
 
       - name: Try 01 - Show set1-attempt01-CHANGELOG content
@@ -252,8 +255,10 @@ jobs:
         id: attempt01-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
+          branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          #commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
           file_pattern: set1-attempt01-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -286,8 +291,10 @@ jobs:
         continue-on-error: true
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
+          branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          #commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
+          commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
           file_pattern: set1-attempt02-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -340,8 +347,10 @@ jobs:
         id: try-03-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
+          branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          #commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
           file_pattern: set1-attempt03-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -374,8 +383,10 @@ jobs:
         continue-on-error: true
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
+          branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          #commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
+          commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
           file_pattern: set1-attempt04-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
