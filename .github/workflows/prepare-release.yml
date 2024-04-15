@@ -153,6 +153,11 @@ jobs:
           echo "Release notes: "
           echo "${{ steps.query-latest-release.outputs.release-notes }}"
           echo ""
+          echo "### Output from the \`print-latest-release\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "Version: ${{ steps.query-latest-release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Date: ${{ steps.query-latest-release.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get unreleased changes release info
@@ -176,6 +181,11 @@ jobs:
           echo "Release notes: "
           echo "${{ steps.query-unreleased-changes.outputs.release-notes }}"
           echo ""
+          echo "### Output from the \`print-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "Version: ${{ steps.query-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Date: ${{ steps.query-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get latest-or-unreleased changes release info
@@ -197,6 +207,11 @@ jobs:
           echo "Release notes: "
           echo "${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}"
           echo ""
+          echo "### Output from the \`print-latest-or-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       - name: Need to write to the unreleased section here
         id: notice-about-changelog
