@@ -70,6 +70,24 @@ jobs:
           echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
           echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
 
+      - name: Get Next Semver
+        id: get-next-semver
+        uses: rwaight/actions/test/get-next-semver@main
+        with:
+          pre-release-id: ${{ inputs.preid }}
+          release-type: ${{ inputs.release-type }}
+          my_action_debug: true
+
+      - name: Report the output from the get-next-semver step
+        if: ${{ steps.get-next-semver.outputs.next-release-version }}
+        run: |
+          echo "The output from the 'get-next-semver' step was: "
+          echo "current release version: ${{ env.current-release-version }} "
+          echo "next release version: ${{ env.next-release-version }} "
+        env:
+          current-release-version: ${{ steps.get-next-semver.outputs.current-release-version }}
+          next-release-version: ${{ steps.get-next-semver.outputs.next-release-version }}
+
       # maybe use https://github.com/EndBug/add-and-commit instead?
       # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
       # user: 'rw-actions-bot <noreply@github.com>'
