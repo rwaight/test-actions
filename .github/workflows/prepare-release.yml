@@ -58,7 +58,8 @@ jobs:
         id: repo-version-info
         uses: rwaight/actions/git/repo-version-info@main
         with:
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          #gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-token: ${{ steps.app-token.outputs.token }}
 
       - name: Print repo version information
         id: print-repo-info
@@ -79,6 +80,7 @@ jobs:
         id: get-next-semver
         uses: rwaight/actions/test/get-next-semver@main
         with:
+          gh-token: ${{ steps.app-token.outputs.token }}
           pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
           my_action_debug: true
