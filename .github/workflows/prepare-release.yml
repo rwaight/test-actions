@@ -69,6 +69,11 @@ jobs:
           echo "Here is the info from the repo-version-info step: "
           echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
           echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       - name: Get Next Semver
         id: get-next-semver
@@ -84,6 +89,11 @@ jobs:
           echo "The output from the 'get-next-semver' step was: "
           echo "current release version: ${{ env.current-release-version }} "
           echo "next release version: ${{ env.next-release-version }} "
+          echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "current release version: ${{ env.current-release-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "next release version: ${{ env.next-release-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
         env:
           current-release-version: ${{ steps.get-next-semver.outputs.current-release-version }}
           next-release-version: ${{ steps.get-next-semver.outputs.next-release-version }}
