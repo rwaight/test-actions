@@ -21,6 +21,7 @@ on:
         default: patch
       preid:
         description: 'Pre-release identifier (only for pre-release builds)'
+        default: rc
         required: false
 
 permissions:
@@ -52,6 +53,22 @@ jobs:
           fetch-depth: '0'
           ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
+
+      - name: Get repo version information
+        id: repo-version-info
+        uses: rwaight/actions/git/repo-version-info@main
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print repo version information
+        id: print-repo-info
+        if: |
+          ${{ steps.repo-version-info.outputs.latest-tag }} || 
+          ${{ steps.repo-version-info.outputs.latest-release }}
+        run: |
+          echo "Here is the info from the repo-version-info step: "
+          echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
 
       # maybe use https://github.com/EndBug/add-and-commit instead?
       # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
