@@ -1,7 +1,7 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
 # this should be moved into the 'release-manager' workflow
 name: '[autorelease] Prepare release PR'
-run-name: 'Prepare release PR - ${{ inputs.release-type }}'
+run-name: 'Test prepare release PR - ${{ inputs.release-type }}'
 
 on: 
   workflow_dispatch:
