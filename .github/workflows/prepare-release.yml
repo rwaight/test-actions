@@ -78,7 +78,9 @@ jobs:
 
       - name: Get Next Semver
         id: get-next-semver
-        uses: rwaight/actions/test/get-next-semver@main
+        continue-on-error: true
+        #uses: rwaight/actions/test/get-next-semver@main
+        uses: rwaight/actions/test/get-next-semver@dev-rw-202404-v5
         with:
           gh-token: ${{ steps.app-token.outputs.token }}
           pre-release-id: ${{ inputs.preid }}
