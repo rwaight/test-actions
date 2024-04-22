@@ -19,6 +19,7 @@ on:
           - preminor
           - prepatch
           - prerelease
+          - pretoprod
         default: patch
       preid:
         description: 'Pre-release identifier (only for pre-release builds)'
