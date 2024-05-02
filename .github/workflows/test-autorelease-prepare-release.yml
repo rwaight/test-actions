@@ -23,11 +23,6 @@ on:
         description: 'Pre-release identifier (only for pre-release builds)'
         default: rc
         required: false
-      include-try2:
-        description: 'run try2?'
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   #contents: read
