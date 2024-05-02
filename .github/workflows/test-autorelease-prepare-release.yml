@@ -381,8 +381,8 @@ jobs:
 
             ${{ steps.build-custom-changelog.outputs.changelog }}
           #labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
-          #labels: actions:autorelease, skip-changelog, version:${{ github.event.inputs.release-type }}
-          labels: actions:autorelease, skip-changelog
+          labels: actions:autorelease, skip-changelog, version:${{ github.event.inputs.release-type }}
+          #labels: actions:autorelease, skip-changelog
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
 
