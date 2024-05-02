@@ -191,6 +191,53 @@ jobs:
         #if: env.MY_WORKFLOW_DEBUG=='true'
         run: ls -R
 
+      - name: Create a release notes file
+        #name: Create a changelog file before rwaight/actions/git/keep-a-changelog-action
+        id: create-release-notes-file
+        run: |
+          ## Create a changelog file using the output from the get-next-semver step
+          ##echo "" >> ${{ env.changelog-file }}
+          touch ${{ env.changelog-file }}
+          echo "The output from the 'get-next-semver' step was: " >> ${{ env.changelog-file }}
+          echo "- current tag       : ${{ env.current-tag }} " >> ${{ env.changelog-file }}
+          echo "- current version   : ${{ env.current-version }} " >> ${{ env.changelog-file }}
+          echo "- next version      : ${{ env.next-version }} " >> ${{ env.changelog-file }}
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> ${{ env.changelog-file }}
+          echo "" >> ${{ env.changelog-file }}
+          ##
+          ## Create a changelog file using the output from the draft-release step
+          echo "The release drafter step outputs are: " >> ${{ env.changelog-file }}
+          echo "id: ${{ steps.draft-release.outputs.id }}" >> ${{ env.changelog-file }}
+          echo "name: ${{ steps.draft-release.outputs.name }}" >> ${{ env.changelog-file }}
+          echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" >> ${{ env.changelog-file }}
+          echo "" >> ${{ env.changelog-file }}
+          echo "URLs: " >> ${{ env.changelog-file }}
+          echo "html_url: ${{ steps.draft-release.outputs.html_url }}" >> ${{ env.changelog-file }}
+          echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" >> ${{ env.changelog-file }}
+          echo "" >> ${{ env.changelog-file }}
+          echo "Version Info: " >> ${{ env.changelog-file }}
+          echo "major_version: ${{ steps.draft-release.outputs.major_version }} " >> ${{ env.changelog-file }}
+          echo "minor_version: ${{ steps.draft-release.outputs.minor_version }} " >> ${{ env.changelog-file }}
+          echo "patch_version: ${{ steps.draft-release.outputs.patch_version }} " >> ${{ env.changelog-file }}
+          echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }} " >> ${{ env.changelog-file }}
+          echo "" >> ${{ env.changelog-file }}
+          #echo "body: " >> ${{ env.changelog-file }}
+          #echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
+          #echo " === end of body === " >> ${{ env.changelog-file }}
+          echo "" >> ${{ env.changelog-file }}
+        env:
+          changelog-file: release-drafter-${{ steps.get-next-semver.outputs.next-version }}-release-notes.txt
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+
+      - name: Create an empty keep-a-changelog file before rwaight/actions/git/keep-a-changelog-action
+        id: create-empty-keep-a-changelog
+        run: |
+          ## Create an empty keep-a-changelog file
+          touch not-release-drafter-autorelease-CHANGELOG.txt
+
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Draft changelog for ${{ github.event.inputs.release-type }} release
         id: draft-changelog
@@ -207,7 +254,7 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
-          changelog: test/not-release-drafter-autorelease-CHANGELOG.txt
+          changelog: not-release-drafter-autorelease-CHANGELOG.txt
 
       - name: Debug | File structure after rwaight/actions/git/keep-a-changelog-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
@@ -237,7 +284,7 @@ jobs:
         with:
           commit-message: 'chore: Update changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
           add-paths: |
-            test/*.txt
+            *.txt
           #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
           #committer: 'releasebot <noreply@github.com>'
           committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
