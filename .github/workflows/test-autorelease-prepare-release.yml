@@ -234,11 +234,11 @@ jobs:
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
-      - name: Create an empty keep-a-changelog file before rwaight/actions/git/keep-a-changelog-action
-        id: create-empty-keep-a-changelog
+      - name: Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
+        id: copy-changelog-template-file
         run: |
-          ## Create an empty keep-a-changelog file
-          touch not-release-drafter-autorelease-CHANGELOG.txt
+          ## Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
+          cp template-CHANGELOG.md keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Draft changelog for ${{ github.event.inputs.release-type }} release
@@ -256,7 +256,7 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
-          changelog: not-release-drafter-autorelease-CHANGELOG.txt
+          changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
 
       - name: Debug | File structure after rwaight/actions/git/keep-a-changelog-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
