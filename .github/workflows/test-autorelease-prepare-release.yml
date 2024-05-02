@@ -274,7 +274,7 @@ jobs:
           preid: ${{ inputs.preid }}
           fail-on-empty-release-notes: false
           #changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
-          changelog: CHANGELOG.md
+          changelog: keep-a-changelog-CHANGELOG.md
 
       # # this is causing issues with the 'create-release-pr' step
       # - name: Commit the keep-a-changelog file
