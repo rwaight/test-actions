@@ -1,5 +1,5 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
-name: 'test [autorelease] prepare release PR'
+name: 'autorelease test - prepare release PR'
 run-name: 'Test: prepare `${{ inputs.release-type }}` release PR'
 
 on: 
@@ -23,11 +23,6 @@ on:
         description: 'Pre-release identifier (only for pre-release builds)'
         default: rc
         required: false
-      include-try2:
-        description: 'run try2?'
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   #contents: read
