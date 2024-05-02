@@ -230,7 +230,7 @@ jobs:
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
         ## steps removed from above
           ###echo "body: " >> ${{ env.changelog-file }}
-          ###echo 'release draft body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
+          ###echo 'release_draft_body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
           ###echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
           ###echo " === end of body === " >> ${{ env.changelog-file }}
           ###echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
@@ -271,7 +271,8 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
-          changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+          #changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+          changelog: CHANGELOG.md
 
       # # this is causing issues with the 'create-release-pr' step
       # - name: Commit the keep-a-changelog file
