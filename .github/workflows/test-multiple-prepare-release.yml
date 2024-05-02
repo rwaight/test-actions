@@ -1,6 +1,6 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
 # this should be moved into the 'release-manager' workflow
-name: '[autorelease] Prepare release PR'
+name: 'test autorelease - Prepare release PR'
 #run-name: 'Test prepare release PR - ${{ inputs.release-type }}'
 run-name: 'Test: Prepare `${{ inputs.release-type }}` release PR'
 
@@ -236,6 +236,51 @@ jobs:
           echo "- Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
+      # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
+      - name: Run rwaight/actions/releases/release-drafter
+        #uses: rwaight/actions/releases/release-drafter@v1
+        uses: rwaight/actions/releases/release-drafter@main
+        id: draft-release
+        # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+        with:
+          config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+          version: ${{ steps.get-next-semver.outputs.next-version }}
+          #prerelease-identifier: 'rc'
+          #prerelease-identifier: ${{ inputs.preid }}
+          #prerelease: ${{ github.event_name == 'pull_request' && true || false }}
+          # https://github.com/release-drafter/release-drafter/pull/1302
+          include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+          #include-pre-releases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
+
+      - name: Provide output from release-drafter
+        # Run this step if the 'id' output was set in the 'draft-release' step
+        if: ${{ steps.draft-release.outputs.id }}
+        id: print-release-drafter-outputs
+        run: |
+         echo "The release drafter step outputs are: "
+         echo "id: ${{ steps.draft-release.outputs.id }}" 
+         echo "name: ${{ steps.draft-release.outputs.name }}" 
+         echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" 
+         echo ""
+         echo "URLs: "
+         echo "html_url: ${{ steps.draft-release.outputs.html_url }}" 
+         echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" 
+         echo ""
+         echo "Version Info: "
+         echo "major_version: ${{ steps.draft-release.outputs.major_version }}" 
+         echo "minor_version: ${{ steps.draft-release.outputs.minor_version }}" 
+         echo "patch_version: ${{ steps.draft-release.outputs.patch_version }}" 
+         echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }}" 
+         echo ""
+         echo "body: "
+         echo "${{ steps.draft-release.outputs.body }}"
+         echo " === end of body === "
+         echo ""
+         echo "The 'print-release-drafter-outputs' step is now complete. "
 
       - name: Need to write to the unreleased section here
         id: notice-about-changelog
