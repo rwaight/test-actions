@@ -296,7 +296,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4
         with:
           fromTag: ${{ steps.get-next-semver.outputs.current-version }}
-          #toTag: ${{ steps.get-next-semver.outputs.next-version }}
+          toTag: ${{ steps.get-next-semver.outputs.next-version }}
           # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
@@ -318,18 +318,57 @@ jobs:
 
       # https://github.com/heinrichreimer/action-github-changelog-generator
       # from https://github.com/github-changelog-generator/github-changelog-generator/wiki/Advanced-change-log-generation-examples#additional-options
-      - name: run heinrichreimer/action-github-changelog-generator
+      - name: run heinrichreimer/action-github-changelog-generator with sinceTag only
+        id: run-heinrichreimer-action-github-changelog-generator-sinceTag-only
+        uses: heinrichreimer/action-github-changelog-generator@v2.3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          output: ./changelog-generator-heinrichreimer-sinceTag-only.md
+          sinceTag: ${{ steps.get-next-semver.outputs.current-version }}
+          #dueTag: ${{ steps.get-next-semver.outputs.next-version }}
+          # might need to set 'futureRelease'
+          # Put the unreleased changes in the specified release number.
+          # This will replace Unreleased section with the specified tag. Handy for generating change logs before tagging.
+          #futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          ##
+          # the examples do not match what the action wants
+          # Unexpected input(s) 'since-tag', valid inputs are 
+          # ['entryPoint', 'args', 'repo', 'user', 'project', 'token', 'dateFormat', 'output', 'base', 'headerLabel',
+          #  'configureSections', 'addSections', 'frontMatter', 'issues', 'issuesWoLabels', 'pullRequests', 
+          # 'prWoLabels', 'filterByMilestone', 'author', 'usernamesAsGithubLogins', 'unreleasedOnly', 'unreleased', 
+          # 'unreleasedLabel', 'compareLink', 'includeLabels', 'excludeLabels', 'issueLineLabels', 'excludeTags', 
+          # 'excludeTagsRegex', 'sinceTag', 'dueTag', 'maxIssues', 'releaseUrl', 'githubSite', 'githubApi', 'simpleList', 
+          # 'futureRelease', 'releaseBranch', 'httpCache', 'cacheFile', 'cacheLog', 'sslCaFile', 'verbose', 'breakingLabel', 
+          # 'breakingLabels', 'enhancementLabel', 'enhancementLabels', 'bugsLabel', 'bugLabels', 'deprecatedLabel', 
+          # 'deprecatedLabels', 'removedLabel', 'removedLabels', 'securityLabel', 'securityLabels', 'issuesLabel', 
+          # 'prLabel', 'onlyLastTag', 'stripHeaders', 'stripGeneratorNotice']
+
+      # https://github.com/heinrichreimer/action-github-changelog-generator
+      # from https://github.com/github-changelog-generator/github-changelog-generator/wiki/Advanced-change-log-generation-examples#additional-options
+      - name: run heinrichreimer/action-github-changelog-generator with sinceTag and dueTag
         id: run-heinrichreimer-action-github-changelog-generator
         uses: heinrichreimer/action-github-changelog-generator@v2.3
         with:
           token: ${{ steps.app-token.outputs.token }}
-          output: ./changelog-generator-heinrichreimer-CHANGELOG.md
-          since-tag: ${{ steps.get-next-semver.outputs.current-version }}
-          #due-tag: ${{ steps.get-next-semver.outputs.next-version }}
-          # might need to set 'future-release'
+          output: ./changelog-generator-heinrichreimer-sinceTag-and-dueTag.md
+          sinceTag: ${{ steps.get-next-semver.outputs.current-version }}
+          dueTag: ${{ steps.get-next-semver.outputs.next-version }}
+          # might need to set 'futureRelease'
           # Put the unreleased changes in the specified release number.
           # This will replace Unreleased section with the specified tag. Handy for generating change logs before tagging.
-          #future-release: ${{ steps.get-next-semver.outputs.next-version }}
+          #futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          ##
+          # the examples do not match what the action wants
+          # Unexpected input(s) 'since-tag', valid inputs are 
+          # ['entryPoint', 'args', 'repo', 'user', 'project', 'token', 'dateFormat', 'output', 'base', 'headerLabel',
+          #  'configureSections', 'addSections', 'frontMatter', 'issues', 'issuesWoLabels', 'pullRequests', 
+          # 'prWoLabels', 'filterByMilestone', 'author', 'usernamesAsGithubLogins', 'unreleasedOnly', 'unreleased', 
+          # 'unreleasedLabel', 'compareLink', 'includeLabels', 'excludeLabels', 'issueLineLabels', 'excludeTags', 
+          # 'excludeTagsRegex', 'sinceTag', 'dueTag', 'maxIssues', 'releaseUrl', 'githubSite', 'githubApi', 'simpleList', 
+          # 'futureRelease', 'releaseBranch', 'httpCache', 'cacheFile', 'cacheLog', 'sslCaFile', 'verbose', 'breakingLabel', 
+          # 'breakingLabels', 'enhancementLabel', 'enhancementLabels', 'bugsLabel', 'bugLabels', 'deprecatedLabel', 
+          # 'deprecatedLabels', 'removedLabel', 'removedLabels', 'securityLabel', 'securityLabels', 'issuesLabel', 
+          # 'prLabel', 'onlyLastTag', 'stripHeaders', 'stripGeneratorNotice']
 
       - name: Debug | File structure after the multiple changelog actions
         #if: env.MY_WORKFLOW_DEBUG=='true'
