@@ -257,7 +257,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt01/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
           #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
           #commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
           commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
@@ -294,7 +294,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt02/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
           #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
           #commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
           commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
@@ -352,7 +352,7 @@ jobs:
         with:
           #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
           #branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt03/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
           #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
           #commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
           commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
@@ -389,7 +389,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt04/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
           #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
           #commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
           commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
@@ -569,7 +569,7 @@ jobs:
         id: attempt01-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
+          branch: 'autorelease/test-try2-attempt01/${{ steps.get-next-version.outputs.version }}'
           commit_message: Update CHANGELOG for ${{ steps.get-next-version.outputs.version }}
           file_pattern: set2-attempt01-CHANGELOG.md
           create_branch: true
@@ -603,7 +603,7 @@ jobs:
         continue-on-error: true
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
+          branch: 'autorelease/test-try2-attempt02/${{ steps.get-next-version.outputs.version }}'
           commit_message: Update set2-attempt02-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
           file_pattern: set2-attempt02-CHANGELOG.md
           create_branch: true
@@ -638,7 +638,7 @@ jobs:
         id: attempt03-commit-changelog
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
+          branch: 'autorelease/test-try2-attempt03/${{ steps.get-next-version.outputs.version }}'
           commit_message: Update set2-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
           file_pattern: set2-attempt03-CHANGELOG.md
           create_branch: true
