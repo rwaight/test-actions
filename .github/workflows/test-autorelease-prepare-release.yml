@@ -304,6 +304,16 @@ jobs:
           # we may need to use 'fetchViaCommits', but looks like
           # we will also need to include the 'fromTag' and 'toTag' options
 
+      # https://github.com/stefanzweifel/changelog-updater-action
+      # from https://github.com/stefanzweifel/changelog-updater-action/blob/main/.github/workflows/update-changelog.yaml
+      - name: Update changelog with stefanzweifel/changelog-updater-action
+        id: run-changelog-updater-action
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          release-notes: ${{ steps.draft-release.outputs.body }}
+          latest-version: ${{ steps.get-next-semver.outputs.next-version }}
+          path-to-changelog: changelog-updater-action-CHANGELOG.md
+
       - name: Debug | File structure after rwaight/actions/git/keep-a-changelog-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
         run: ls -R
