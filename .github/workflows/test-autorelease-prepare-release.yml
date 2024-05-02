@@ -221,24 +221,34 @@ jobs:
           echo "patch_version: ${{ steps.draft-release.outputs.patch_version }} " >> ${{ env.changelog-file }}
           echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }} " >> ${{ env.changelog-file }}
           echo "" >> ${{ env.changelog-file }}
-          echo "body: " >> ${{ env.changelog-file }}
-          echo 'release draft body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
-          echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
-          echo " === end of body === " >> ${{ env.changelog-file }}
-          echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
+          ###echo "body: " >> ${{ env.changelog-file }}
+          ###echo 'release draft body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
+          ###echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
+          ###echo " === end of body === " >> ${{ env.changelog-file }}
+          ###echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
           echo "" >> ${{ env.changelog-file }}
         env:
-          changelog-file: release-drafter-${{ steps.get-next-semver.outputs.next-version }}-release-notes.txt
+          changelog-file: release-drafter-${{ steps.get-next-semver.outputs.next-version }}-release-notes.md
           current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
           current-version: ${{ steps.get-next-semver.outputs.current-version }}
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
-      - name: Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
+      - name: Commit release drafter notes file
+        uses: rwaight/actions/git/add-and-commit@main
+        with:
+          add: 'release-drafter-${{ steps.get-next-semver.outputs.next-version }}-release-notes.md'
+          default_author: rw-actions-bot[bot]
+          message: "chore: draft release-notes for release ${{ steps.get-next-semver.outputs.next-version }}"
+          committer_name: rw-actions-bot[bot]
+          committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          new_branch: 'autorelease/test-test/${{ steps.get-next-semver.outputs.next-version }}'
+
+      - name: Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
         id: copy-changelog-template-file
         run: |
-          ## Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
-          cp template-CHANGELOG.md keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
+          ## Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+          cp template-CHANGELOG.md keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Draft changelog for ${{ github.event.inputs.release-type }} release
@@ -256,7 +266,33 @@ jobs:
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
           fail-on-empty-release-notes: false
-          changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.txt
+          changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+
+      - name: Commit the keep-a-changelog file
+        uses: rwaight/actions/git/add-and-commit@main
+        with:
+          add: 'keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md'
+          default_author: rw-actions-bot[bot]
+          message: "chore: add keep-a-changelog for release ${{ steps.get-next-semver.outputs.next-version }}"
+          committer_name: rw-actions-bot[bot]
+          committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          new_branch: 'autorelease/test-test/${{ steps.get-next-semver.outputs.next-version }}'
+
+      # https://github.com/mikepenz/release-changelog-builder-action
+      - name: Build a custom changelog with mikepenz/release-changelog-builder-action
+        id: build-custom-changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          fromTag: ${{ steps.get-next-semver.outputs.current-version }}
+          toTag: ${{ steps.get-next-semver.outputs.next-version }}
+          # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          ignorePreReleases: "false"   # default is 'false'
+          outputFile: ./release-changelog-builder-${{ steps.get-next-semver.outputs.next-version }}.txt
+          #fetchReleaseInformation: true   # default is 'false'
+          # we may need to use 'fetchViaCommits', but looks like
+          # we will also need to include the 'fromTag' and 'toTag' options
 
       - name: Debug | File structure after rwaight/actions/git/keep-a-changelog-action
         #if: env.MY_WORKFLOW_DEBUG=='true'
@@ -286,7 +322,7 @@ jobs:
         with:
           commit-message: 'chore: Update changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
           add-paths: |
-            *.txt
+            ./*.txt
           #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
           #committer: 'releasebot <noreply@github.com>'
           committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
