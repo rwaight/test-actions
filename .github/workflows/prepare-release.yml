@@ -74,39 +74,49 @@ jobs:
           ${{ steps.repo-version-info.outputs.latest-tag }} || 
           ${{ steps.repo-version-info.outputs.latest-release }}
         run: |
+          ## Print repo version information
           echo "Here is the info from the repo-version-info step: "
-          echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
-          echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          ##
           echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-          echo "latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
-          echo "latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       - name: Get Next Semver
         id: get-next-semver
-        continue-on-error: true
+        #continue-on-error: true
         uses: rwaight/actions/test/get-next-semver@main
         with:
           gh-token: ${{ steps.app-token.outputs.token }}
           pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
-          my_action_debug: true
+          action-verbose: true
 
       - name: Report the output from the get-next-semver step
-        if: ${{ steps.get-next-semver.outputs.next-release-version }}
+        if: ${{ steps.get-next-semver.outputs.next-version }}
         run: |
+          ## Report the output from the get-next-semver step
           echo "The output from the 'get-next-semver' step was: "
-          echo "current release version: ${{ env.current-release-version }} "
-          echo "next release version: ${{ env.next-release-version }} "
+          echo "- current tag       : ${{ env.current-tag }} "
+          echo "- current version   : ${{ env.current-version }} "
+          echo "- next version      : ${{ env.next-version }} "
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} "
+          ##
           echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-          echo "current release version: ${{ env.current-release-version }} " >> $GITHUB_STEP_SUMMARY
-          echo "next release version: ${{ env.next-release-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
         env:
-          current-release-version: ${{ steps.get-next-semver.outputs.current-release-version }}
-          next-release-version: ${{ steps.get-next-semver.outputs.next-release-version }}
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
       # maybe use https://github.com/EndBug/add-and-commit instead?
       # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
@@ -158,15 +168,15 @@ jobs:
         id: print-latest-release
         run: |
           echo "Latest release information: "
-          echo "Version: ${{ steps.query-latest-release.outputs.version }}"
-          echo "Date: ${{ steps.query-latest-release.outputs.release-date }}"
-          echo "Release notes: "
+          echo "- Version: ${{ steps.query-latest-release.outputs.version }}"
+          echo "- Date: ${{ steps.query-latest-release.outputs.release-date }}"
+          echo "- Release notes: "
           echo "${{ steps.query-latest-release.outputs.release-notes }}"
           echo ""
           echo "### Output from the \`print-latest-release\` step" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-          echo "Version: ${{ steps.query-latest-release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "Date: ${{ steps.query-latest-release.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ steps.query-latest-release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Date: ${{ steps.query-latest-release.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       # https://github.com/release-flow/keep-a-changelog-action
@@ -186,15 +196,17 @@ jobs:
         id: print-unreleased-changes
         run: |
           echo "Unreleased changes information: "
-          echo "Version: ${{ steps.query-unreleased-changes.outputs.version }}"
-          echo "Date: ${{ steps.query-unreleased-changes.outputs.release-date }}"
-          echo "Release notes: "
+          echo "- Action name: ${{ steps.query-unreleased-changes.uses }}"
+          echo "- Version: ${{ steps.query-unreleased-changes.outputs.version }}"
+          echo "- Date: ${{ steps.query-unreleased-changes.outputs.release-date }}"
+          echo "- Release notes: "
           echo "${{ steps.query-unreleased-changes.outputs.release-notes }}"
           echo ""
-          echo "### Output from the \`print-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
+          echo "### Output from the \`query-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-          echo "Version: ${{ steps.query-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "Date: ${{ steps.query-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Action name: ${{ steps.query-unreleased-changes.uses }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ steps.query-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Date: ${{ steps.query-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       # https://github.com/release-flow/keep-a-changelog-action
@@ -212,15 +224,17 @@ jobs:
         id: print-latest-or-unreleased-changes
         run: |
           echo "latest-or-unreleased changes information: "
-          echo "Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}"
-          echo "Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}"
-          echo "Release notes: "
+          echo "- Action name: ${{ steps.query-latest-or-unreleased-changes.uses }}"
+          echo "- Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}"
+          echo "- Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}"
+          echo "- Release notes: "
           echo "${{ steps.query-latest-or-unreleased-changes.outputs.release-notes }}"
           echo ""
-          echo "### Output from the \`print-latest-or-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
+          echo "### Output from the \`query-latest-or-unreleased-changes\` step" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-          echo "Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Action name: ${{ steps.query-latest-or-unreleased-changes.uses }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Date: ${{ steps.query-latest-or-unreleased-changes.outputs.release-date }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
       - name: Need to write to the unreleased section here
@@ -243,7 +257,7 @@ jobs:
           #latest-version: ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
           # this step was erroring out based on the 'version' output from 'query-latest-or-unreleased-changes'
           #   see https://github.com/rwaight/test-actions/actions/runs/8696137640/job/23848728260
-          latest-version: ${{ steps.get-next-semver.outputs.next-release-version }}
+          latest-version: ${{ steps.get-next-semver.outputs.next-version }}
           path-to-changelog: set1-attempt01-CHANGELOG.md
 
       - name: Try 01 - Show set1-attempt01-CHANGELOG content
@@ -256,10 +270,10 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          branch: 'autorelease/test-try1-attempt01/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt01/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-version }}'
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-version }}'
           #commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
-          commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
+          commit_message: Update set1-attempt01-CHANGELOG for ${{ steps.get-next-semver.outputs.next-version }}
           file_pattern: set1-attempt01-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -293,10 +307,10 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.query-latest-or-unreleased-changes.outputs.version }}'
-          branch: 'autorelease/test-try1-attempt02/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt02/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-version }}'
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-version }}'
           #commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.query-latest-or-unreleased-changes.outputs.version }}
-          commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
+          commit_message: Update set1-attempt02-CHANGELOG for ${{ steps.get-next-semver.outputs.next-version }}
           file_pattern: set1-attempt02-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -350,11 +364,11 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          #branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          branch: 'autorelease/test-try1-attempt03/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          #branch: 'autorelease/prepare-${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-version }}'
+          branch: 'autorelease/test-try1-attempt03/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-version }}'
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-version }}'
           #commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
-          commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
+          commit_message: Update set1-attempt03-CHANGELOG for ${{ steps.get-next-semver.outputs.next-version }}
           file_pattern: set1-attempt03-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -388,10 +402,10 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           #branch: 'autorelease/test-prepare/${{ steps.get-next-version.outputs.version }}'
-          branch: 'autorelease/test-try1-attempt04/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-release-version }}'
-          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-release-version }}'
+          branch: 'autorelease/test-try1-attempt04/${{ github.event.inputs.release-type }}/${{ steps.get-next-semver.outputs.next-version }}'
+          #branch: 'autorelease/test-prepare/${{ steps.get-next-semver.outputs.next-version }}'
           #commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-version.outputs.version }}
-          commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-semver.outputs.next-release-version }}
+          commit_message: Update set1-attempt04-CHANGELOG for ${{ steps.get-next-semver.outputs.next-version }}
           file_pattern: set1-attempt04-CHANGELOG.md
           create_branch: true
           commit_options: '--signoff'
@@ -411,9 +425,9 @@ jobs:
         id: print-get-next-version
         run: |
           echo "Output from the 'get-next-version' step: "
-          echo "Version: ${{ steps.get-next-version.outputs.version }}"
-          echo "Date: ${{ steps.get-next-version.outputs.release-date }}"
-          echo "Release notes: "
+          echo "- Version: ${{ steps.get-next-version.outputs.version }}"
+          echo "- Date: ${{ steps.get-next-version.outputs.release-date }}"
+          echo "- Release notes: "
           echo "${{ steps.get-next-version.outputs.release-notes }}"
           echo ""
 
@@ -539,9 +553,9 @@ jobs:
         id: print-get-next-version
         run: |
           echo "Output from the 'get-next-version' step: "
-          echo "Version: ${{ steps.get-next-version.outputs.version }}"
-          echo "Date: ${{ steps.get-next-version.outputs.release-date }}"
-          echo "Release notes: "
+          echo "- Version: ${{ steps.get-next-version.outputs.version }}"
+          echo "- Date: ${{ steps.get-next-version.outputs.release-date }}"
+          echo "- Release notes: "
           echo "${{ steps.get-next-version.outputs.release-notes }}"
           echo ""
 
