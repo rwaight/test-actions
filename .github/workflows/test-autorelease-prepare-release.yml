@@ -293,7 +293,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4
         with:
           fromTag: ${{ steps.get-next-semver.outputs.current-version }}
-          toTag: ${{ steps.get-next-semver.outputs.next-version }}
+          #toTag: ${{ steps.get-next-semver.outputs.next-version }}
           # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
