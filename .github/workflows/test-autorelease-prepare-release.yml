@@ -329,7 +329,11 @@ jobs:
           # might need to set 'futureRelease'
           # Put the unreleased changes in the specified release number.
           # This will replace Unreleased section with the specified tag. Handy for generating change logs before tagging.
-          #futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          issues: true
+          pullRequests: true
+          unreleased: true
+          verbose: true
           ##
           # the examples do not match what the action wants
           # Unexpected input(s) 'since-tag', valid inputs are 
@@ -348,6 +352,7 @@ jobs:
       - name: run heinrichreimer/action-github-changelog-generator with sinceTag and dueTag
         id: run-heinrichreimer-action-github-changelog-generator
         uses: heinrichreimer/action-github-changelog-generator@v2.3
+        continue-on-error: true
         with:
           token: ${{ steps.app-token.outputs.token }}
           output: ./changelog-generator-heinrichreimer-sinceTag-and-dueTag.md
@@ -356,7 +361,11 @@ jobs:
           # might need to set 'futureRelease'
           # Put the unreleased changes in the specified release number.
           # This will replace Unreleased section with the specified tag. Handy for generating change logs before tagging.
-          #futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          futureRelease: ${{ steps.get-next-semver.outputs.next-version }}
+          issues: true
+          pullRequests: true
+          unreleased: true
+          verbose: true
           ##
           # the examples do not match what the action wants
           # Unexpected input(s) 'since-tag', valid inputs are 
