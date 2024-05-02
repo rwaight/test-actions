@@ -268,8 +268,10 @@ jobs:
           # commenting out 'keep-unreleased-section: true' did not fix having blank release notes
           # going to comment out the 'query' steps prior to the 'bump' step
           # going to try to comment out the 'fail-on-empty-release-notes' option next
-          version: ${{ github.event.inputs.release-type }}
-          preid: ${{ github.event.inputs.preid }}
+          #version: ${{ github.event.inputs.release-type }}
+          version: ${{ inputs.release-type }}
+          #preid: ${{ github.event.inputs.preid }}
+          preid: ${{ inputs.preid }}
           fail-on-empty-release-notes: false
           #changelog: keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
           changelog: CHANGELOG.md
