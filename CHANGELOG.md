@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+## [0.2.3] - 2024-05-02
 
 ## [0.2.2] - 2024-03-14
 
@@ -47,7 +48,9 @@
 
 - Initial draft of the GitHub test actions monorepo
 
-[Unreleased]: https://github.com/rwaight/test-actions/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/rwaight/test-actions/compare/v0.2.3...HEAD
+
+[0.2.3]: https://github.com/rwaight/test-actions/compare/v0.2.2...v0.2.3
 
 [0.2.2]: https://github.com/rwaight/test-actions/compare/v0.2.1...v0.2.2
 
