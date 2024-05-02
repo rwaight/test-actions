@@ -332,7 +332,7 @@ jobs:
         #uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
         uses: rwaight/actions/github/create-pull-request@main
         with:
-          commit-message: 'chore: Update changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
+          commit-message: 'chore: changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
           add-paths: |
             ./*.txt
             ./*.md
