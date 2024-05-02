@@ -221,11 +221,6 @@ jobs:
           echo "patch_version: ${{ steps.draft-release.outputs.patch_version }} " >> ${{ env.changelog-file }}
           echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }} " >> ${{ env.changelog-file }}
           echo "" >> ${{ env.changelog-file }}
-          ###echo "body: " >> ${{ env.changelog-file }}
-          ###echo 'release draft body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
-          ###echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
-          ###echo " === end of body === " >> ${{ env.changelog-file }}
-          ###echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
           echo "" >> ${{ env.changelog-file }}
         env:
           changelog-file: release-drafter-${{ steps.get-next-semver.outputs.next-version }}-release-notes.md
@@ -233,6 +228,12 @@ jobs:
           current-version: ${{ steps.get-next-semver.outputs.current-version }}
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+        ## steps removed from above
+          ###echo "body: " >> ${{ env.changelog-file }}
+          ###echo 'release draft body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
+          ###echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
+          ###echo " === end of body === " >> ${{ env.changelog-file }}
+          ###echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
 
       - name: Commit release drafter notes file
         uses: rwaight/actions/git/add-and-commit@main
