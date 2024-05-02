@@ -1,0 +1,293 @@
+# from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
+name: 'test [autorelease] prepare release PR'
+run-name: 'Test: prepare `${{ inputs.release-type }}` release PR'
+
+on: 
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release type'
+        type: choice
+        required: true
+        options:
+          - major
+          - minor
+          - patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+          - pretoprod
+        default: patch
+      preid:
+        description: 'Pre-release identifier (only for pre-release builds)'
+        default: rc
+        required: false
+      include-try2:
+        description: 'run try2?'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  #contents: read
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  autorelease-prepare-release:
+    name: Prepare ${{ inputs.release-type }} release pull request
+    runs-on: ubuntu-latest
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Get repo version information
+        id: repo-version-info
+        uses: rwaight/actions/git/repo-version-info@main
+        with:
+          #gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+
+      - name: Print repo version information
+        id: print-repo-info
+        if: |
+          ${{ steps.repo-version-info.outputs.latest-tag }} || 
+          ${{ steps.repo-version-info.outputs.latest-release }}
+        run: |
+          ## Print repo version information
+          echo "Here is the info from the repo-version-info step: "
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          ##
+          echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
+      - name: Run rwaight/actions test/get-next-semver
+        id: get-next-semver
+        #continue-on-error: true
+        uses: rwaight/actions/test/get-next-semver@main
+        with:
+          gh-token: ${{ steps.app-token.outputs.token }}
+          pre-release-id: ${{ inputs.preid }}
+          release-type: ${{ inputs.release-type }}
+          action-verbose: true
+
+      - name: Report the output from the get-next-semver step
+        if: ${{ steps.get-next-semver.outputs.next-version }}
+        run: |
+          ## Report the output from the get-next-semver step
+          echo "The output from the 'get-next-semver' step was: "
+          echo "- current tag       : ${{ env.current-tag }} "
+          echo "- current version   : ${{ env.current-version }} "
+          echo "- next version      : ${{ env.next-version }} "
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} "
+          ##
+          echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        env:
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+
+      # maybe use https://github.com/EndBug/add-and-commit instead?
+      # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # user: 'rw-actions-bot <noreply@github.com>'
+      - name: Set up git config
+        id: set-up-git
+        run: |
+          ## Run 'git --version' then 'git config'
+          git --version
+          ## Configure git to login as the RW Actions Bot.
+          git config user.name rw-actions-bot[bot]
+          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          echo "the 'set-up-git' step has completed. "
+
+      - name: 'Ensure actions:autorelease label exists'
+        run: |
+          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'actions:autorelease' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
+          else
+            echo "the 'actions:autorelease' label exists"
+          fi
+        env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
+      - name: Run rwaight/actions release-drafter
+        #uses: rwaight/actions/releases/release-drafter@v1
+        uses: rwaight/actions/releases/release-drafter@main
+        id: draft-release
+        # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+        with:
+          config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+          version: ${{ steps.get-next-semver.outputs.next-version }}
+          #prerelease-identifier: ${{ inputs.preid }}
+          #prerelease: ${{ github.event_name == 'pull_request' && true || false }}
+          # https://github.com/release-drafter/release-drafter/pull/1302
+          include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+          #include-pre-releases: true
+        env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Provide output from release-drafter
+        # Run this step if the 'id' output was set in the 'draft-release' step
+        if: ${{ steps.draft-release.outputs.id }}
+        id: print-release-drafter-outputs
+        run: |
+         echo "The release drafter step outputs are: "
+         echo "id: ${{ steps.draft-release.outputs.id }}" 
+         echo "name: ${{ steps.draft-release.outputs.name }}" 
+         echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" 
+         echo ""
+         echo "URLs: "
+         echo "html_url: ${{ steps.draft-release.outputs.html_url }}" 
+         echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" 
+         echo ""
+         echo "Version Info: "
+         echo "major_version: ${{ steps.draft-release.outputs.major_version }}" 
+         echo "minor_version: ${{ steps.draft-release.outputs.minor_version }}" 
+         echo "patch_version: ${{ steps.draft-release.outputs.patch_version }}" 
+         echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }}" 
+         echo ""
+         echo "body: "
+         echo "${{ steps.draft-release.outputs.body }}"
+         echo " === end of body === "
+         echo ""
+         echo "The 'print-release-drafter-outputs' step is now complete. "
+
+      - name: Need to write to the unreleased section here
+        id: notice-about-changelog
+        run: |
+          echo "Need to actually write to the unreleased section of the changelog here. "
+          echo "might need to look at https://github.com/heinrichreimer/action-github-changelog-generator"
+
+      - name: Debug | File structure before rwaight/actions/git/keep-a-changelog-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # https://github.com/release-flow/keep-a-changelog-action
+      - name: Draft changelog for ${{ github.event.inputs.release-type }} release
+        id: draft-changelog
+        #uses: release-flow/keep-a-changelog-action@v3
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: rwaight/actions/git/keep-a-changelog-action@main
+        with:
+          # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
+          command: bump
+          keep-unreleased-section: true
+          # commenting out 'keep-unreleased-section: true' did not fix having blank release notes
+          # going to comment out the 'query' steps prior to the 'bump' step
+          # going to try to comment out the 'fail-on-empty-release-notes' option next
+          version: ${{ github.event.inputs.release-type }}
+          preid: ${{ github.event.inputs.preid }}
+          fail-on-empty-release-notes: false
+          changelog: test/not-release-drafter-autorelease-CHANGELOG.txt
+
+      - name: Debug | File structure after rwaight/actions/git/keep-a-changelog-action
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: ls -R
+
+      # # might not need this step if the 'create-release-pr' step will add and commit the file
+      # - name: Commit changelog
+      #   uses: rwaight/actions/git/add-and-commit@main
+      #   with:
+      #     add: '*.txt'
+      #     default_author: rw-actions-bot[bot]
+      #     message: "chore: draft changelog for ${{ github.event.inputs.release-type }} release ${{ steps.get-next-semver.outputs.next-version }}"
+      #     committer_name: rw-actions-bot[bot]
+      #     committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     new_branch: 'autorelease/test-test/${{ steps.get-next-semver.outputs.next-version }}'
+
+      # - name: Print notice that no pr is being created
+      #   id: print-notice-no-pr
+      #   run: |
+      #     echo "::notice title=Release PR NOT Prepared::A release PR WAS NOT created, please review the output of the workflow"
+
+      - name: Create Pull Request using rwaight/actions/github/create-pull-request
+        id: create-release-pr
+        #uses: peter-evans/create-pull-request@v6
+        #uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
+        uses: rwaight/actions/github/create-pull-request@main
+        with:
+          commit-message: 'chore: Update changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
+          add-paths: |
+            test/*.txt
+          #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
+          #committer: 'releasebot <noreply@github.com>'
+          committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
+          branch: 'autorelease/test-test/${{ steps.get-next-semver.outputs.next-version }}'
+          title: '[autorelease] test release ${{ steps.get-next-semver.outputs.next-version }}'
+          # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
+          # contents of the release notes don't get chomped. See https://yaml-multiline.info/
+          body: |
+            **This PR was created automatically by the rw-actions-bot**
+
+            **:warning: Approving this PR will trigger a workflow that generates a draft release. You need to publish this release when you are happy with it.**
+
+            ## Release notes
+
+            The changes in this PR prepare for release ${{ steps.get-next-semver.outputs.next-version }}. 
+            
+            A release draft has been created, please review it as part of the release process: ${{ steps.draft-release.outputs.html_url }}
+
+            The release notes from release-drafter are:
+
+            ---
+
+            ${{ steps.draft-release.outputs.body }}
+
+            ---
+
+            ## Changelog
+
+            A changelog was generated by the rwaight/actions/git/keep-a-changelog-action for release ${{ steps.get-next-semver.outputs.next-version }}. The changelog notes are:
+
+            ---
+
+            ${{ steps.draft-changelog.outputs.release-notes }}
+          #labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
+          labels: actions:autorelease, skip-changelog, version:${{ github.event.inputs.release-type }}
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Check outputs from create-release-pr
+        if: ${{ steps.create-release-pr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.create-release-pr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.create-release-pr.outputs.pull-request-url }}"
+
+      - name: Output summary
+        run: |
+          echo "::notice title=Release PR Prepared::A release PR has been created, please merge it to continue with the release process: ${{ steps.create-release-pr.outputs.pull-request-url }}"
+          echo "::notice title=Draft release prepared::A release draft has been created, please review it as part of the release process: ${{ steps.draft-release.outputs.html_url }}"
