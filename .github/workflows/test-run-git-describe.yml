@@ -1,5 +1,6 @@
 name: git describe
-run-name: run `git describe` commands from commit ${{ github.sha }}
+#run-name: run `git describe` commands from commit ${{ github.sha }}
+run-name: describe commit `${{ github.sha }}`
 
 # https://github.com/actions/checkout/issues/290
 
@@ -23,9 +24,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run 'git fetch --force --prune --unshallow --tags' before 'git describe'
+      - name: Run 'git fetch --force --prune --tags' before 'git describe'
         id: git-fetch
-        run: "git fetch --force --prune --unshallow --tags"
+        # error: 'fatal: --unshallow on a complete repository does not make sense'
+        #run: "git fetch --force --prune --unshallow --tags"
+        # end error for the command above
+        run: "git fetch --force --prune --tags"
 
       - name: 01 | Run 'git describe --tags --always --long'
         id: git-describe-01
@@ -59,7 +63,7 @@ jobs:
           exclude: '*-rc*'
           commit-ish: 'HEAD~'
           # if you unshallow in a separate step, use the following option:
-          # skip-unshallow: 'true'
+          skip-unshallow: 'true'
           abbrev: false
 
       - name: Show Tag
