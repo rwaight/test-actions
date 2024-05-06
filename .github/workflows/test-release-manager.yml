@@ -5,8 +5,10 @@ name: Test Release Manager
 run-name: Run Release Manager on ${{ github.event_name }}
 on:
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
-  # push:  # 'on push' is used by: 'update-release-draft'
+  push:  # 'on push' is used by: 'update-release-draft'
   #   branches: [main]
+    tags:
+      - 'v*.*.*'
   pull_request:
     # 'on pull_request' is used by: 'update-release-draft' (closed)
     types: [closed]
@@ -433,8 +435,10 @@ jobs:
     outputs:
       RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
     if: | 
-      (github.repository_owner == 'rwaight') &&
-      (github.event_name=='release' && github.event.action=='published')
+      (github.repository_owner == 'rwaight') && (
+      (github.event_name=='release' && github.event.action=='published') ||
+      (github.ref_type == 'tag')
+      )
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
@@ -443,6 +447,7 @@ jobs:
 
       - name: Get release version
         id: get-release-version
+        if: (github.event_name=='release')
         run: |
           VERSION="${{ github.event.release.tag_name }}"
 
