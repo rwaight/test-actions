@@ -1,0 +1,69 @@
+name: git describe
+run-name: run `git describe` commands from commit ${{ github.sha }}
+
+# https://github.com/actions/checkout/issues/290
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev-**'
+      - 'test-**'
+    tags:
+      - v**
+
+jobs:
+  describe:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run 'git fetch --force --prune --unshallow --tags' before 'git describe'
+        id: git-fetch
+        run: "git fetch --force --prune --unshallow --tags"
+
+      - name: 01 | Run 'git describe --tags --always --long'
+        id: git-describe-01
+        run: "git describe --tags --always --long"
+
+      - name: 02 | Run 'git describe --tags'
+        id: git-describe-02
+        run: "git describe --tags"
+
+      - name: 03 | Run 'git describe --abbrev=0 --tags'
+        id: git-describe-03
+        run: "git describe --abbrev=0 --tags"
+
+      - name: 04 | Run 'git describe --tags `git rev-list --tags --max-count=1`'
+        id: git-describe-04
+        run: "git describe --tags `git rev-list --tags --max-count=1`"
+
+      - name: 01 | Run 'git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*' | sort -r'
+        id: git-ls-remote-01
+        run: "git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*' | sort -r"
+
+      # find out why we get an error with 'git describe --tags' after checkout
+      # see https://github.com/jimschubert/query-tag-action/issues/3#issue-818152138 and 
+      # https://github.com/hannesa2/mediapipe/pull/31/files#diff-3ab46ee209a127470fce3c2cf106b1a1dbadbb929a4b5b13656a4bc4ce19c0b8R33-R39
+      - name: Query Tag
+        id: query-tag
+        uses: jimschubert/query-tag-action@v2.2
+        continue-on-error: true
+        with:
+          include: 'v*'
+          exclude: '*-rc*'
+          commit-ish: 'HEAD~'
+          # if you unshallow in a separate step, use the following option:
+          # skip-unshallow: 'true'
+          abbrev: false
+
+      - name: Show Tag
+        id: display
+        if: ${{ steps.query-tag.outputs.tag }}
+        run: |
+          echo 'Output from Find Tag: ${{steps.query-tag.outputs.tag}}'
