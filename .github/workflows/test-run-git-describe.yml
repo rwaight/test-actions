@@ -37,17 +37,30 @@ jobs:
         id: git-describe-01
         run: "git describe --tags --always --long"
 
-      - name: 02 | Run 'git describe --tags'
-        id: git-describe-02
+      - name: 02a | Run 'git describe --tags'
+        id: git-describe-02a
         run: "git describe --tags"
 
-      - name: 03 | Run 'git describe --abbrev=0 --tags'
-        id: git-describe-03
+      - name: 02b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
+        id: git-describe-02b
+        run: 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
+
+      - name: 03a | Run 'git describe --abbrev=0 --tags'
+        id: git-describe-03a
         run: "git describe --abbrev=0 --tags"
 
-      - name: 04 | Run 'git describe --tags `git rev-list --tags --max-count=1`'
-        id: git-describe-04
-        run: "git describe --tags `git rev-list --tags --max-count=1`"
+      - name: 03b | Run 'git describe --abbrev=0 --tags --match "v[0-9].[0-9].[0-9]*"'
+        id: git-describe-03b
+        run: 'git describe --abbrev=0 --tags --match "v[0-9].[0-9].[0-9]*"'
+
+      - name: 04a | Run 'git describe --tags `git rev-list --tags --max-count=1`'
+        id: git-describe-04a
+        run: 'git describe --tags `git rev-list --tags --max-count=1`'
+
+      - name: 04b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*" `git rev-list --tags --max-count=1`'
+        id: git-describe-04b
+        continue-on-error: true
+        run: 'git describe --tags --match "v[0-9].[0-9].[0-9]*" `git rev-list --tags --max-count=1`'
 
       - name: 05 | Run 'git describe --tags --match="v[0-9]*"'
         id: git-describe-05
