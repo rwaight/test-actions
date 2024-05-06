@@ -54,15 +54,25 @@ jobs:
         continue-on-error: true
         run: 'git describe --tags --match="v[0-9]*"'
 
-      - name: 06 | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
-        id: git-describe-06
+      - name: 06a | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
+        id: git-describe-06a
         continue-on-error: true
         run: 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
 
-      - name: 07 | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*-*"'
-        id: git-describe-07
+      - name: 06b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
+        id: git-describe-06b
+        continue-on-error: true
+        run: 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
+
+      - name: 07a | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*-*"'
+        id: git-describe-07a
         continue-on-error: true
         run: 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*-*"'
+
+      - name: 07b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]-*"'
+        id: git-describe-07b
+        continue-on-error: true
+        run: 'git describe --tags --match "v[0-9].[0-9].[0-9]-*"'
 
       - name: 01 | Run 'git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*' | sort -r'
         id: git-ls-remote-01
