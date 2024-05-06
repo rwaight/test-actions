@@ -15,7 +15,11 @@ permissions:
 jobs:
   merge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
+    #if:  startsWith(github.head_ref, 'autorelease/')
+    #if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
+    if: |
+      (github.event.pull_request.merged == true) && 
+      startsWith(github.head_ref, 'autorelease/')
     steps:
     - name: Checkout files from commit tree
       uses: actions/checkout@v4
