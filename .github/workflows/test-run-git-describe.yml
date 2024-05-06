@@ -3,6 +3,9 @@ name: git describe
 run-name: describe commit `${{ github.sha }}`
 
 # https://github.com/actions/checkout/issues/290
+# https://github.com/actions/checkout/issues/1471#issuecomment-1771231294
+# https://github.com/actions/checkout/pull/1396#issue-1782799601
+#    https://github.blog/2020-12-21-get-up-to-speed-with-partial-clone-and-shallow-clone
 
 on:
   push:
@@ -30,7 +33,6 @@ jobs:
         #run: "git fetch --force --prune --unshallow --tags"
         # end error for the command above
         run: "git fetch --force --prune --tags"
-
       - name: 01 | Run 'git describe --tags --always --long'
         id: git-describe-01
         run: "git describe --tags --always --long"
@@ -47,9 +49,34 @@ jobs:
         id: git-describe-04
         run: "git describe --tags `git rev-list --tags --max-count=1`"
 
+      - name: 05 | Run 'git describe --tags --match="v[0-9]*"'
+        id: git-describe-05
+        continue-on-error: true
+        run: 'git describe --tags --match="v[0-9]*"'
+
+      - name: 06 | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
+        id: git-describe-06
+        continue-on-error: true
+        run: 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
+
+      - name: 07 | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*-*"'
+        id: git-describe-07
+        continue-on-error: true
+        run: 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*-*"'
+
       - name: 01 | Run 'git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*' | sort -r'
         id: git-ls-remote-01
         run: "git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*' | sort -r"
+
+      - name: 02 | Run 'git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*-*' | sort -r'
+        id: git-ls-remote-02
+        continue-on-error: true
+        run: "git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*-*' | sort -r"
+
+      - name: 03 | Run 'git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*.*' | sort -r'
+        id: git-ls-remote-03
+        continue-on-error: true
+        run: "git ls-remote --tags --sort=committerdate | grep -o 'v.*.*.*.*' | sort -r"
 
       # find out why we get an error with 'git describe --tags' after checkout
       # see https://github.com/jimschubert/query-tag-action/issues/3#issue-818152138 and 
