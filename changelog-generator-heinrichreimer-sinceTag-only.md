@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.2.3](https://github.com/rwaight/test-actions/tree/v0.2.3) (2024-05-02)
+## [v0.2.3](https://github.com/rwaight/test-actions/tree/v0.2.3) (2024-05-03)
 
 [Full Changelog](https://github.com/rwaight/test-actions/compare/v0...v0.2.3)
 
@@ -11,6 +11,8 @@
 
 **Merged pull requests:**
 
+- refactor: use proper autorelease branch name [\#55](https://github.com/rwaight/test-actions/pull/55) ([rwaight](https://github.com/rwaight))
+- \[autorelease\] test release v0.2.3 [\#54](https://github.com/rwaight/test-actions/pull/54) ([rw-actions-bot[bot]](https://github.com/apps/rw-actions-bot))
 - fix: heinrichreimer action-github-changelog-generator [\#53](https://github.com/rwaight/test-actions/pull/53) ([rwaight](https://github.com/rwaight))
 - feat: update test autorelease [\#52](https://github.com/rwaight/test-actions/pull/52) ([rwaight](https://github.com/rwaight))
 - refactor: update prepare release and changelog files [\#48](https://github.com/rwaight/test-actions/pull/48) ([rwaight](https://github.com/rwaight))
