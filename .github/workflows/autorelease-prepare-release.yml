@@ -40,7 +40,7 @@ jobs:
     name: Prepare ${{ inputs.release-type }} release pull request
     runs-on: ubuntu-latest
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
     steps:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
@@ -59,14 +59,14 @@ jobs:
           #ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Get repo version information
+      - name: repo-version-info | Run rwaight/actions git/repo-version-info
         id: repo-version-info
         uses: rwaight/actions/git/repo-version-info@main
         with:
           #gh-token: ${{ secrets.GITHUB_TOKEN }}
           gh-token: ${{ steps.app-token.outputs.token }}
 
-      - name: Print repo version information
+      - name: repo-version-info | Print outputs
         id: print-repo-info
         if: |
           ${{ steps.repo-version-info.outputs.latest-tag }} || 
@@ -155,6 +155,35 @@ jobs:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
+      - name: bump-json-version | Run rwaight/actions test/bump-json-version
+        id: bump-json-version
+        uses: rwaight/actions/test/bump-json-version@main
+        with:
+          author-name: rw-actions-bot[bot]
+          author-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          committer-name: rw-actions-bot[bot]
+          committer-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          default-author: github_actions
+          json-vars-file: 'my-test-custom-variables.json'
+          json-vars-field: 'my_custom_version'
+          gh-token: ${{ steps.app-token.outputs.token }}
+          release-type: ${{ inputs.release-type }}
+          action-verbose: true
+
+      - name: bump-json-version | Print outputs
+        if: ${{ steps.bump-json-version.outputs.next-release-version }}
+        run: |
+          echo "The output from the 'bump-json-version' step was: "
+          echo "current release version: ${{ env.current-release-version }} "
+          echo "next release version: ${{ env.next-release-version }} "
+          echo "old json version: ${{ env.old-json-version }} "
+          echo "new json version: ${{ env.new-json-version }} "
+        env:
+          current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
+          next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
+          old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
+          new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
+
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: release-drafter | Run rwaight/actions release-drafter
         #uses: rwaight/actions/releases/release-drafter@v1
@@ -205,8 +234,8 @@ jobs:
           echo "Need to actually write to the unreleased section of the changelog here. "
           echo "might need to look at https://github.com/heinrichreimer/action-github-changelog-generator"
 
-      - name: Debug | File structure before the multiple changelog actions
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | File structure before the multiple changelog actions
+        #if: env.VERBOSE_WORKFLOW=='true'
         run: ls -R
 
       # - name: Create a release notes file
@@ -272,6 +301,57 @@ jobs:
       #   run: |
       #     ## Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
       #     cp template-CHANGELOG.md keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+      # - name: Copy the template-CHANGELOG.md into keep-a-changelog-${{ steps.get-next-semver.outputs.next-version }}-autorelease-CHANGELOG.md
+
+      - name: Update the '${{ env.vars-file }}' file
+        id: update-vars-file
+        run: |
+          ## Update the '${{ env.vars-file }}' file 
+          echo "Starting the 'update-vars-file' step... "
+          echo "  updating the 'my_release_type' field with the user provided release-type"
+          tmp1=$(mktemp1)
+          jq '.my_release_type = "${{ env.release-type }}"' ${{ env.vars-file }} > "$tmp1" && mv "$tmp1" ${{ env.vars-file }}
+          echo "    the jq command has finished "
+          echo "  checking the value of the 'my_release_type' field "
+          check_release_type=$(jq --raw-output .my_release_type ${{ env.vars-file }})
+          echo "    my_release_type: ${check_release_type}"
+          echo ""
+          #
+          echo "updating the 'my_reviewed_image' field with the user provided reviewed-image"
+          tmp2=$(mktemp2)
+          jq '.my_reviewed_image = "${{ env.reviewed-image }}"' ${{ env.vars-file }} > "$tmp2" && mv "$tmp2" ${{ env.vars-file }}
+          echo "    the jq command has finished "
+          echo "  checking the value of the 'my_reviewed_image' field "
+          check_reviewed_image=$(jq --raw-output .my_reviewed_image ${{ env.vars-file }})
+          echo "    my_reviewed_image: ${check_reviewed_image}"
+          echo ""
+          #
+          echo "Finishing the 'update-vars-file' step... "
+        env:
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          vars-file: my-test-custom-variables.json
+          release-type: ${{ inputs.release-type }}
+          reviewed-image: ${{ inputs.reviewed-image }}
+
+      - name: Commit changes to the '${{ env.vars-file }}' file
+        id: commit-vars-file-changes
+        # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
+        #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
+        #uses: stefanzweifel/git-auto-commit-action@v4
+        #uses: EndBug/add-and-commit@v9
+        uses: rwaight/actions/git/add-and-commit@main
+        with:
+          add: ${{ env.vars-file }}
+          author_name: rw-actions-bot[bot]
+          author_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          commit: --signoff
+          committer_name: rw-actions-bot[bot]
+          committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          default_author: user_info
+          message: 'chore(vars-json): update the release-type and reviewed-image for the ${{ inputs.release-type }} release'
+        env:
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          vars-file: my-test-custom-variables.json
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: run release-flow/keep-a-changelog-action from rwaight import
@@ -397,8 +477,8 @@ jobs:
           # 'deprecatedLabels', 'removedLabel', 'removedLabels', 'securityLabel', 'securityLabels', 'issuesLabel', 
           # 'prLabel', 'onlyLastTag', 'stripHeaders', 'stripGeneratorNotice']
 
-      - name: Debug | File structure after the multiple changelog actions
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | File structure after the multiple changelog actions
+        #if: env.VERBOSE_WORKFLOW=='true'
         run: ls -R
 
       # # might not need this step if the 'create-release-pr' step will add and commit the file
@@ -430,6 +510,7 @@ jobs:
           add-paths: |
             ./*.txt
             ./*.md
+            my-test-custom-variables.json
           #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
           #committer: 'releasebot <noreply@github.com>'
           committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
