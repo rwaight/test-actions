@@ -1,0 +1,241 @@
+# from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/pr-merged.yml
+# this workflow creates a draft release, it is ALMOST a duplicate of the 'release-drafter' job in the 'release-manager' workflow
+name: '[autorelease] PR merged'
+run-name: '[autorelease] PR merged'
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+
+  get-token:
+    #name: Get the app token
+    runs-on: ubuntu-latest
+    if: |
+      (github.event.pull_request.merged == true) && 
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+    outputs:
+      token: ${{ steps.app-token.outputs.token }}
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+  branch-info:
+    # get information from the autorelease branch
+    #name: get info from the autorelease branch
+    runs-on: ubuntu-latest
+    needs: [get-token]
+    if: |
+      (github.event.pull_request.merged == true) && 
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+    outputs:
+      release-version: ${{ steps.get-release-version.outputs.release-version }}
+      release-type: ${{ steps.get-release-type.outputs.release-type }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          #ref: ${{ github.head_ref }}
+          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ needs.get-token.outputs.token }}
+
+      - name: Get release version from the autorelease branch
+        id: get-release-version
+        run: |
+          # Head branch should be named autorelease/<version>
+          if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
+            echo "::error::Invalid branch '${{ github.event.pull_request.head.ref }}'"
+            exit 1
+          fi
+          VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | awk -F/ '{print $2}')
+          echo "VERSION=$VERSION"
+  
+          RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+          if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+          else
+            echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+          fi
+  
+          if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+  
+          if [[ -f $GITHUB_OUTPUT ]]; then
+            echo "release-version=$VERSION" >> $GITHUB_OUTPUT
+            echo "release-version=$VERSION" >> $GITHUB_ENV
+            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          else
+            echo "::set-output name=release-version::$VERSION"
+            echo "::set-output name=is-prerelease::$pre"
+          fi
+
+      - name: Get release type from the '${{ env.vars-file }}' file
+        id: get-release-type
+        run: |
+          ## Get release type from the '${{ env.vars-file }}' file 
+          echo "Starting the 'get-release-type' step... "
+          echo "Getting the value of the '${{ env.type-field }}' field "
+          get_release_type=$(jq --raw-output .${{ env.type-field }} ${{ env.vars-file }})
+          echo "  ${{ env.type-field }}:   ${get_release_type} "
+          echo ""
+          echo "Setting 'release-type' to ${get_release_type} "
+          echo "release-type=${get_release_type}" >> $GITHUB_OUTPUT
+          echo "release-type=${get_release_type}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'get-release-type' step... "
+        env:
+          vars-file: my-test-custom-variables.json
+          type-field: my_release_type
+          version-field: my_custom_version
+
+  autorelease-info:
+    # call the autorelease get info workflow
+    #name: get autorelease info
+    uses: ./.github/workflows/reuse_autorelease-get-info.yml
+    needs: [get-token, branch-info]
+    if: |
+      (github.event.pull_request.merged == true) && 
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+    secrets:
+       #token: ${{ secrets.access-token }}
+       token: ${{ needs.get-token.outputs.token }}
+    #secrets: inherit
+    with:
+      release-type: ${{ needs.branch-info.outputs.release-type }}
+      #preid: rc
+      verbose: true
+      #release-version: ${{ needs.branch-info.outputs.release-version }}
+
+  merge-info:
+    # get the information about the merged pull request
+    #name: get info about the merged pull request
+    runs-on: ubuntu-latest
+    needs: [get-token]
+    #if: (github.event.pull_request.merged == true)
+    if: |
+      (github.event.pull_request.merged == true) && 
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+    outputs:
+      pr-sha: ${{ steps.pr-commit.outputs.sha }}
+      main-sha: ${{ steps.main-commit.outputs.sha }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          #ref: ${{ github.head_ref }}
+          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ needs.get-token.outputs.token }}
+
+      - name: Print Labels from the PR
+        uses: actions/github-script@v6
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pullRequest } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const labels = pullRequest.labels.map(label => label.name);
+            console.log('Labels:', labels.join(', '));
+
+      - name: Print the version label from the PR
+        id: get-version-label
+        if: contains(github.event.pull_request.labels.*.name, 'version:')
+        run: |
+          ## Print the version label from the PR
+          echo "The 'version:' label exists in the pull request."
+          echo "now we need to find out how to grab that as a value... "
+          ##
+          echo "attempting to get the version label from the pull request with bash... "
+          version_label=$(echo "${{ github.event.pull_request.labels.*.name }}" | grep -o 'version:[^,]*' | sed 's/version://')
+          echo "version_label was set to ${version_label}"
+          echo "going to output the version label"
+          echo "version_label=${version_label}" >> $GITHUB_OUTPUT
+
+      - name: Get PR commit SHA
+        id: pr-commit
+        run: |
+          echo "getting the PR commit SHA"
+          git rev-parse ${{ github.event.pull_request.head.sha }}
+          pr-sha=$(git rev-parse ${{ github.event.pull_request.head.sha }})
+          echo "the PR SHA is ${pr-sha}"
+          echo "sha=${pr-sha}" >> $GITHUB_OUTPUT
+
+      - name: Get main branch commit SHA
+        id: main-commit
+        run: |
+          echo "getting the main commit SHA"
+          git rev-parse ${{ github.event.pull_request.base.sha }}
+          main-sha=$(git rev-parse ${{ github.event.pull_request.base.sha }})
+          echo "the main SHA is ${main-sha}"
+          echo "sha=${main-sha}" >> $GITHUB_OUTPUT
+
+      - name: Compare SHAs
+        run: |
+          echo "PR commit SHA: ${{ steps.pr-commit.outputs.sha }}"
+          echo "Main branch commit SHA: ${{ steps.main-commit.outputs.sha }}"
+
+  create-tag:
+    runs-on: ubuntu-latest
+    needs: [get-token, branch-info, autorelease-info, merge-info]
+    #needs: [get-token, branch-info, autorelease-info]
+    if: |
+      (github.event.pull_request.merged == true) && 
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          #ref: ${{ github.head_ref }}
+          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ needs.get-token.outputs.token }}
+
+      - name: release-tag-updater | Create the ${{ env.release-version }} version tag
+        id: release-tag-updater
+        uses: rwaight/actions/releases/release-tag-updater@v1
+        continue-on-error: true
+        with:
+          #tag: 1.2.3
+          tag: ${{ env.release-version }} # this might have to be the release version minus the 'v'
+          prefix-regex: 'v?'
+          fail-on-non-semver-tag: true # default is false
+          update-major: false
+          update-minor: false
+          skip-repo-setup: true # default is false
+          create-release: false # default is true
+          #github-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ needs.get-token.outputs.token }}
+        #if: github.event.release.prerelease == false
+        #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
+        env:
+          #release-version: ${{ steps.get-release-version.outputs.release-version }}
+          release-version: ${{ needs.branch-info.outputs.release-version }}
+
+      - name: autorelease | Display Instructions
+        run: |
+          echo "::notice title=version ${{ env.release-version }} tag created::The version ${{ env.release-version }} tag has been created, check the build workflow to ensure the build starts. "
+
+## after the tag is created, the builder should run
+## after the builder runs, triggered by the new tag, the completed build job should update the draft release with the image ID
