@@ -195,7 +195,8 @@ jobs:
           json-vars-file: 'my-test-custom-variables.json'
           json-vars-field: 'my_custom_version'
           gh-token: ${{ steps.app-token.outputs.token }}
-          release-type: ${{ inputs.release-type }}
+          #release-type: ${{ inputs.release-type }}
+          release-version: ${{ steps.get-next-semver.outputs.next-version }}
           action-verbose: true
 
       - name: bump-json-version | Print outputs
