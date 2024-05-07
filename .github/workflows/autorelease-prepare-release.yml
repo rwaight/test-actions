@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
-          ref: ${{ github.head_ref }}
+          #ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Get repo version information
@@ -78,7 +78,7 @@ jobs:
           echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
-      - name: Run rwaight/actions test/get-next-semver
+      - name: get-next-semver | Run rwaight/actions test/get-next-semver
         id: get-next-semver
         #continue-on-error: true
         uses: rwaight/actions/test/get-next-semver@main
@@ -88,7 +88,7 @@ jobs:
           release-type: ${{ inputs.release-type }}
           action-verbose: true
 
-      - name: Report the output from the get-next-semver step
+      - name: get-next-semver | Print outputs
         if: ${{ steps.get-next-semver.outputs.next-version }}
         run: |
           ## Report the output from the get-next-semver step
@@ -124,30 +124,43 @@ jobs:
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
           echo "the 'set-up-git' step has completed. "
 
-      - name: 'Ensure actions:autorelease label exists'
+      - name: Ensure 'actions:autorelease' label exists
         run: |
           LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
           if [[ -z "$LABEL" ]]; then
             echo "Creating 'actions:autorelease' label"
             gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
           else
-            echo "the 'actions:autorelease' label exists"
+            echo "the 'actions:autorelease' label already exists"
+          fi
+        env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Ensure 'version:${{ inputs.release-type }}' label exists
+        run: |
+          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="version:${{ inputs.release-type }}")')
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'version:${{ inputs.release-type }}' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="version:${{ inputs.release-type }}" -f color="baa938" -f description="Related to a ''${{ inputs.release-type }}'' version release"
+          else
+            echo "the 'version:${{ inputs.release-type }}' label already exists"
           fi
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
-      - name: Run rwaight/actions release-drafter
+      - name: release-drafter | Run rwaight/actions release-drafter
         #uses: rwaight/actions/releases/release-drafter@v1
         uses: rwaight/actions/releases/release-drafter@main
-        id: draft-release
+        id: release-drafter
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
-          config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+          config-name: release-template_monorepo-test-actions.yml # located in .github/ in default branch
           version: ${{ steps.get-next-semver.outputs.next-version }}
           #prerelease-identifier: ${{ inputs.preid }}
-          #prerelease: ${{ github.event_name == 'pull_request' && true || false }}
+          prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
           # https://github.com/release-drafter/release-drafter/pull/1302
           include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
           #include-pre-releases: true
@@ -155,28 +168,28 @@ jobs:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Provide output from release-drafter
-        # Run this step if the 'id' output was set in the 'draft-release' step
-        if: ${{ steps.draft-release.outputs.id }}
+      - name: release-drafter | Print outputs
+        # Run this step if the 'id' output was set in the 'release-drafter' step
+        if: ${{ steps.release-drafter.outputs.id }}
         id: print-release-drafter-outputs
         run: |
          echo "The release drafter step outputs are: "
-         echo "id: ${{ steps.draft-release.outputs.id }}" 
-         echo "name: ${{ steps.draft-release.outputs.name }}" 
-         echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" 
+         echo "id: ${{ steps.release-drafter.outputs.id }}" 
+         echo "name: ${{ steps.release-drafter.outputs.name }}" 
+         echo "tag_name: ${{ steps.release-drafter.outputs.tag_name }}" 
          echo ""
          echo "URLs: "
-         echo "html_url: ${{ steps.draft-release.outputs.html_url }}" 
-         echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" 
+         echo "html_url: ${{ steps.release-drafter.outputs.html_url }}" 
+         echo "upload_url: ${{ steps.release-drafter.outputs.upload_url }}" 
          echo ""
          echo "Version Info: "
-         echo "major_version: ${{ steps.draft-release.outputs.major_version }}" 
-         echo "minor_version: ${{ steps.draft-release.outputs.minor_version }}" 
-         echo "patch_version: ${{ steps.draft-release.outputs.patch_version }}" 
-         echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }}" 
+         echo "major_version: ${{ steps.release-drafter.outputs.major_version }}" 
+         echo "minor_version: ${{ steps.release-drafter.outputs.minor_version }}" 
+         echo "patch_version: ${{ steps.release-drafter.outputs.patch_version }}" 
+         echo "resolved_version: ${{ steps.release-drafter.outputs.resolved_version }}" 
          echo ""
          echo "body: "
-         echo "${{ steps.draft-release.outputs.body }}"
+         echo "${{ steps.release-drafter.outputs.body }}"
          echo " === end of body === "
          echo ""
          echo "The 'print-release-drafter-outputs' step is now complete. "
@@ -205,21 +218,21 @@ jobs:
       #     echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> ${{ env.changelog-file }}
       #     echo "" >> ${{ env.changelog-file }}
       #     ##
-      #     ## Create a changelog file using the output from the draft-release step
+      #     ## Create a changelog file using the output from the release-drafter step
       #     echo "The release drafter step outputs are: " >> ${{ env.changelog-file }}
-      #     echo "id: ${{ steps.draft-release.outputs.id }}" >> ${{ env.changelog-file }}
-      #     echo "name: ${{ steps.draft-release.outputs.name }}" >> ${{ env.changelog-file }}
-      #     echo "tag_name: ${{ steps.draft-release.outputs.tag_name }}" >> ${{ env.changelog-file }}
+      #     echo "id: ${{ steps.release-drafter.outputs.id }}" >> ${{ env.changelog-file }}
+      #     echo "name: ${{ steps.release-drafter.outputs.name }}" >> ${{ env.changelog-file }}
+      #     echo "tag_name: ${{ steps.release-drafter.outputs.tag_name }}" >> ${{ env.changelog-file }}
       #     echo "" >> ${{ env.changelog-file }}
       #     echo "URLs: " >> ${{ env.changelog-file }}
-      #     echo "html_url: ${{ steps.draft-release.outputs.html_url }}" >> ${{ env.changelog-file }}
-      #     echo "upload_url: ${{ steps.draft-release.outputs.upload_url }}" >> ${{ env.changelog-file }}
+      #     echo "html_url: ${{ steps.release-drafter.outputs.html_url }}" >> ${{ env.changelog-file }}
+      #     echo "upload_url: ${{ steps.release-drafter.outputs.upload_url }}" >> ${{ env.changelog-file }}
       #     echo "" >> ${{ env.changelog-file }}
       #     echo "Version Info: " >> ${{ env.changelog-file }}
-      #     echo "major_version: ${{ steps.draft-release.outputs.major_version }} " >> ${{ env.changelog-file }}
-      #     echo "minor_version: ${{ steps.draft-release.outputs.minor_version }} " >> ${{ env.changelog-file }}
-      #     echo "patch_version: ${{ steps.draft-release.outputs.patch_version }} " >> ${{ env.changelog-file }}
-      #     echo "resolved_version: ${{ steps.draft-release.outputs.resolved_version }} " >> ${{ env.changelog-file }}
+      #     echo "major_version: ${{ steps.release-drafter.outputs.major_version }} " >> ${{ env.changelog-file }}
+      #     echo "minor_version: ${{ steps.release-drafter.outputs.minor_version }} " >> ${{ env.changelog-file }}
+      #     echo "patch_version: ${{ steps.release-drafter.outputs.patch_version }} " >> ${{ env.changelog-file }}
+      #     echo "resolved_version: ${{ steps.release-drafter.outputs.resolved_version }} " >> ${{ env.changelog-file }}
       #     echo "" >> ${{ env.changelog-file }}
       #     echo "" >> ${{ env.changelog-file }}
       #   env:
@@ -231,7 +244,7 @@ jobs:
       #   ## steps removed from above
       #     ###echo "body: " >> ${{ env.changelog-file }}
       #     ###echo 'release_draft_body<<ReleaseDraftEOF' >> ${{ env.changelog-file }}
-      #     ###echo "${{ steps.draft-release.outputs.body }}" >> ${{ env.changelog-file }}
+      #     ###echo "${{ steps.release-drafter.outputs.body }}" >> ${{ env.changelog-file }}
       #     ###echo " === end of body === " >> ${{ env.changelog-file }}
       #     ###echo 'ReleaseDraftEOF' >> ${{ env.changelog-file }}
 
@@ -312,7 +325,7 @@ jobs:
         id: run-stefanzweifel-changelog-updater-action
         uses: stefanzweifel/changelog-updater-action@v1
         with:
-          release-notes: ${{ steps.draft-release.outputs.body }}
+          release-notes: ${{ steps.release-drafter.outputs.body }}
           latest-version: ${{ steps.get-next-semver.outputs.next-version }}
           path-to-changelog: ./changelog-updater-stefanzweifel-CHANGELOG.md
 
@@ -424,21 +437,23 @@ jobs:
           body: |
             **This PR was created automatically by the rw-actions-bot**
 
-            **:warning: Approving this PR will trigger a workflow that generates a draft release. You need to publish this release when you are happy with it.**
+            **:warning: Merging this PR will trigger a workflow that creates a version tag and generates a draft release.**
+            
+            **You need to publish the release manually, when you are happy with it.**
 
             ## Release notes
 
             The changes in this PR prepare for release ${{ steps.get-next-semver.outputs.next-version }}. 
             
-            A release draft has been created, please review it as part of the release process: ${{ steps.draft-release.outputs.html_url }}
+            A release draft has been created, please review it as part of the release process: ${{ steps.release-drafter.outputs.html_url }}
 
             The release notes from release-drafter are:
 
             ---
 
-            ${{ steps.draft-release.outputs.body }}
+            ${{ steps.release-drafter.outputs.body }}
           #labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
-          labels: actions:autorelease, skip-changelog, version:${{ github.event.inputs.release-type }}
+          labels: actions:autorelease, skip-changelog, version:${{ inputs.release-type }}
           #labels: actions:autorelease, skip-changelog
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
@@ -452,4 +467,4 @@ jobs:
       - name: Output summary
         run: |
           echo "::notice title=Release PR Prepared::A release PR has been created, please merge it to continue with the release process: ${{ steps.create-release-pr.outputs.pull-request-url }}"
-          echo "::notice title=Draft release prepared::A release draft has been created, please review it as part of the release process: ${{ steps.draft-release.outputs.html_url }}"
+          echo "::notice title=Draft release prepared::A release draft has been created, please review it as part of the release process: ${{ steps.release-drafter.outputs.html_url }}"
