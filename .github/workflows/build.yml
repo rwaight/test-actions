@@ -1,0 +1,241 @@
+name: Test Builder
+
+# Controls when the action will run. 
+on: 
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - ready_for_review
+      - review_requested
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # Inputs:             # https://docs.github.com/en/enterprise-cloud@latest/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      create_image:
+        description: 'Create an image from build'
+        default: 'false'
+        required: false
+        type: string
+      build_method:
+        description: 'The build method, one of: to-prod, to-main, to-dev, or something else maybe'
+        default: 'not-set'
+        required: false
+        type: string
+      build_version:
+        description: 'The build version, provided to the workflow from the autorelease workflow'
+        default: 'not-set'
+        required: false
+        type: string
+      reviewed_image:
+        description: 'The ID of the image that will be converted'
+        default: 'not-set'
+        required: false
+        type: string
+    # Secrets
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+    # No secrets in this reusable workflow
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    # Map the workflow outputs to job outputs
+    outputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      BUILD_JOB_STATUS:
+        description: 'the status of the build job'
+        value: ${{ jobs.test-build.outputs.BUILD_JOB_STATUS }}
+      BUILD_TYPE:
+        description: 'the build type'
+        value: ${{ jobs.test-build.outputs.BUILD_TYPE }}
+      BUILD_METHOD:
+        description: 'the build method'
+        value: ${{ jobs.test-build.outputs.BUILD_METHOD }}
+      BUILD_VERSION:
+        description: 'the build version'
+        value: ${{ jobs.test-build.outputs.BUILD_VERSION }}
+      BUILD_OUTCOME:
+        description: 'the build outcome'
+        value: ${{ jobs.test-build.outputs.BUILD_OUTCOME }}
+      REVIEWED_IMAGE:
+        description: 'the reviewed image ID'
+        value: ${{ jobs.test-build.outputs.REVIEWED_IMAGE }}
+
+  workflow_dispatch:
+    inputs:
+      create_image:
+        description: 'Create an image from build'
+        required: true
+        default: false
+        type: boolean
+      notify_me:
+        description: 'Send me a notification'
+        required: true
+        default: false
+        type: boolean
+      # build_method:
+      #   description: 'The build method, one of: to-prod, to-main, to-dev, or something else maybe'
+      #   type: choice
+      #   required: true
+      #   options:
+      #     - to-prod
+      #     - to-main
+      #     - to-dev
+      #   default: to-dev
+      # reviewed_image:
+      #   description: 'The ID of the image that will be converted'
+      #   default: 'not-set'
+      #   required: false
+      #   type: string
+  schedule:
+    - cron: '15 18 * * 2'  # once a week on Tuesday at 18:15 UTC, https://www.timeanddate.com/worldclock/timezone/utc
+
+env:
+  build_method: ${{ inputs.build_method || 'to-dev' }}
+  build_version: ${{ inputs.build_version }}
+  create_image: ${{ inputs.create_image || true }}
+  notify_me: ${{ inputs.notify_me || true }}
+  reviewed_image: ${{ inputs.reviewed_image }}
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    outputs:
+      BUILD_JOB_STATUS: ${{ job.status }}
+      BUILD_TYPE: ${{ steps.build-results-output.outputs.BUILD_TYPE }}
+      BUILD_METHOD: ${{ steps.build-results-output.outputs.BUILD_METHOD }}
+      BUILD_VERSION: ${{ steps.build-results-output.outputs.BUILD_VERSION }}
+      BUILD_OUTCOME: ${{ steps.build-results-output.outputs.BUILD_OUTCOME }}
+      REVIEWED_IMAGE: ${{ steps.build-results-output.outputs.REVIEWED_IMAGE }}
+    steps:
+
+      - name: Verbose | Print the inputs
+        #if: inputs.verbose-action=='true'
+        id: verbose-print-inputs
+        shell: bash
+        run: | 
+          ## Print the inputs if inputs.verbose-action=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-inputs' step. "
+          echo ""
+          echo "build_method is  :  ${{ inputs.build_method }} "
+          echo "build_version is :  ${{ inputs.build_version }} "
+          echo "create_image is  :  ${{ inputs.create_image }} "
+          echo "notify_me is     :  ${{ inputs.notify_me }} "
+          echo "reviewed_image is:  ${{ inputs.reviewed_image }} "
+          ##
+          echo "completing the 'verbose-print-inputs' step. "
+
+      - name: Verbose | Output the runner environment and GitHub context
+        #if: inputs.verbose-action=='true'
+        id: verbose-print-env-and-context
+        run: | 
+          ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-env-and-context' step. "
+          echo ""
+          echo "::group::Runner Environment"
+          echo "## Runner Environment"
+          env | sort
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub context"
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          ##
+          echo "completing the 'verbose-print-env-and-context' step. "
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      # Set the MY_BUILD_TYPE value to 'test123' for a test
+      - name: MY_BUILD_TYPE | Set build type to 'test123'
+        id: run-build
+        continue-on-error: true
+        run: |
+          ## Set build type to 'test123'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'run-build' step. "
+          echo ""
+          MY_BUILD_TYPE=test123
+          echo "Build Type: ${MY_BUILD_TYPE}"
+          echo "MY_BUILD_TYPE=${MY_BUILD_TYPE}" >> $GITHUB_ENV
+          echo "EXTRA_TYPE_VAR=${MY_BUILD_TYPE}" >> $GITHUB_ENV
+          ##
+          echo "BUILD_METHOD=${{ env.build_method }}" >> $GITHUB_ENV
+          echo "BUILD_VERSION=${{ env.build_version }}" >> $GITHUB_ENV
+          echo "REVIEWED_IMAGE=${{ env.reviewed_image }}" >> $GITHUB_ENV
+          ##
+          echo "CREATE_IMAGE=${{ env.create_image }}" >> $GITHUB_ENV
+          echo "NOTIFY_ME=${{ env.notify_me }}" >> $GITHUB_ENV
+          ##
+          echo "completing the 'verbose-print-env-and-context' step. "
+        env:
+          build_method: ${{ env.build_method }}
+          build_version: ${{ env.build_version }}
+          reviewed_image: ${{ env.reviewed_image }}
+          create_image: ${{ env.create_image }}
+          notify_me: ${{ env.notify_me }}
+
+      # Create a summary to output on the workflow page
+      - name: Create summary of build results
+        #if: inputs.verbose-action=='true'
+        id: build-summary
+        run: |
+          ## Create summary of build results
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'build-summary' step. "
+          echo ""
+          echo "<details><summary> Build results summary (click to expand) </summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "### Build info" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- Build conclusion / outcome: \`${{ steps.run-build.conclusion }}\` / \`${{ steps.run-build.outcome }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Current job status: \`${{ job.status }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build type    : \`${{ env.MY_BUILD_TYPE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build method  : \`${{ env.BUILD_METHOD }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build version : \`${{ env.BUILD_VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Create image  : \`${{ env.CREATE_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Notify me     : \`${{ env.NOTIFY_ME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Reviewed image: \`${{ env.REVIEWED_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "" # this is a blank line
+          echo "The next step should be the build-results-output task"
+          ##
+          echo "completing the 'build-summary' step. "
+
+      # Declare output variables that need to be used by other jobs
+      - name: Output variables from build results job
+        id: build-results-output
+        if: always()
+        run: |
+          ## Output variables from build results job
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'build-results-output' step. "
+          echo "Creating outputs for the post build tasks job."
+          echo "BUILD_TYPE=${{ env.MY_BUILD_TYPE }}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_OUTCOME=${{ steps.run-build.outcome }}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_METHOD=${{ env.BUILD_METHOD }}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_VERSION=${{ env.BUILD_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "REVIEWED_IMAGE=${{ env.REVIEWED_IMAGE }}" >> "$GITHUB_OUTPUT"
+          echo ""
+          ##
+          echo "completing the 'build-results-output' step. "
+        # env:
+        #   build_method: ${{ inputs.build_method }}
+        #   reviewed_image: ${{ inputs.reviewed_image }}
