@@ -157,7 +157,8 @@ jobs:
 
       - name: Ensure 'actions:autorelease' label exists
         run: |
-          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
+          LABEL=$(gh label list --search "actions:autorelease" --limit 1 --json name --jq '.[].name')
+          echo "  the value of LABEL is '${LABEL}'. "
           if [[ -z "$LABEL" ]]; then
             echo "Creating 'actions:autorelease' label"
             gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
@@ -166,11 +167,12 @@ jobs:
           fi
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Ensure 'version:${{ inputs.release-type }}' label exists
         run: |
-          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="version:${{ inputs.release-type }}")')
+          LABEL=$(gh label list --search "version:${{ inputs.release-type }}" --limit 1 --json name --jq '.[].name')
+          echo "  the value of LABEL is '${LABEL}'. "
           if [[ -z "$LABEL" ]]; then
             echo "Creating 'version:${{ inputs.release-type }}' label"
             gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="version:${{ inputs.release-type }}" -f color="baa938" -f description="Related to a ''${{ inputs.release-type }}'' version release"
@@ -179,7 +181,7 @@ jobs:
           fi
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: bump-json-version | Run rwaight/actions test/bump-json-version
         id: bump-json-version
