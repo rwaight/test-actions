@@ -155,7 +155,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           #github_token: ${{ steps.app-token.outputs.token }}
-          custom_tag: ${{ steps.get-release-version.outputs.release-version }}
+          custom_tag: test-${{ steps.get-release-version.outputs.release-version }}
           commit_sha: ${{ steps.main-commit.outputs.sha }}
           #default_bump: ${{ steps.get-version-label.outputs.version_label }}
           dry_run: true
@@ -203,14 +203,46 @@ jobs:
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
           echo "the 'set-up-git' step has completed. "
 
-      - name: Create the ${{ steps.get-release-version.outputs.release-version }} tag
+      - name: release-tag-updater | Create version tag
+        id: release-tag-updater
+        uses: rwaight/actions/releases/release-tag-updater@v1
         continue-on-error: true
-        run: |
-          echo "Creating the '${{ env.release-version }}' tag"
-          echo "Will sign the tag maybe?"
-          git tag -a ${{ env.release-version }} -m "Code updated to ${{ env.release-version }}" -s ${{ steps.main-commit.outputs.sha }}
+        with:
+          #tag: 1.2.3
+          tag: ${{ env.release-version }} # this might have to be the release version minus the 'v'
+          prefix-regex: 'v?'
+          fail-on-non-semver-tag: true # default is false
+          update-major: false
+          update-minor: false
+          skip-repo-setup: true # default is false
+          create-release: false # default is true
+          github-token: ${{ steps.app-token.outputs.token }}
+        #if: github.event.release.prerelease == false
+        #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
         env:
           release-version: ${{ steps.get-release-version.outputs.release-version }}
+
+      # forgot that we have the 'release-tag-updater' action already....
+      # - name: Attempt to create the ${{ steps.get-release-version.outputs.release-version }} tag
+      #   continue-on-error: true
+      #   run: |
+      #     echo "Creating the '${{ env.release-version }}' tag"
+      #     echo "Maybe we can even sign the tag? "
+      #     echo ""
+      #     echo "attempting to create and sign the tag ..."
+      #     git tag -a ${{ env.release-version }} -m "Code updated to ${{ env.release-version }}" -s ${{ steps.main-commit.outputs.sha }}
+      #     echo "need to look above to see if the 'git tag -a' command worked..."
+      #     echo ""
+      #     echo "now we need to see if we can verify the signed tag... "
+      #     git tag -v ${{ env.release-version }}
+      #     echo "need to look above to see if the 'git tag' command worked..."
+      #     echo ""
+      #     echo "now we need to see if we can push the signed and verified tag... "
+      #     git push -f origin ${{ env.release-version }}
+      #     echo "need to look above to see if the 'git tag' command worked..."
+      #     echo ""
+      #   env:
+      #     release-version: ${{ steps.get-release-version.outputs.release-version }}
 
       - name: keep-a-changelog-action | Get release notes
         id: keep-a-changelog-action
