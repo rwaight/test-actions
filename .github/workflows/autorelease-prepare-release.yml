@@ -19,6 +19,11 @@ on:
           - prerelease
           - pretoprod
         default: patch
+      reviewed-image:
+        description: 'The ID of the image that will be converted'
+        default: 'not-set'
+        required: true
+        type: string
       preid:
         description: 'Pre-release identifier (only for pre-release builds)'
         default: rc
