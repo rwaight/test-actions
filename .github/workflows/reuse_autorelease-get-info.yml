@@ -1,0 +1,249 @@
+name: '[autorelease] get info'
+run-name: 'Get autorelease info for ${{ inputs.release-type }}'
+
+on: 
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # Inputs:             # https://docs.github.com/en/enterprise-cloud@latest/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # keep the 'bot-name' input in this file for future use
+      # bot-name:
+      #   description: 'The name of the bot, excluding the [bot]'
+      #   default: 'rw-actions-bot'
+      #   required: false
+      #   type: string
+      # keep the 'bot-name' input in this file for future use
+      #
+      # bot-email:
+      #   description: 'The email address for the bot'
+      #   default: 'not-set'
+      #   required: false
+      #   type: string
+      # create_image:
+      #   description: 'Create an image from build'
+      #   default: 'false'
+      #   required: false
+      #   type: string
+      # build_method:
+      #   description: 'The build method, one of: to-prod, to-main, to-dev, or something else maybe'
+      #   default: 'not-set'
+      #   required: false
+      #   type: string
+      # build_version:
+      #   description: 'The build version, provided to the workflow from the autorelease workflow'
+      #   default: 'not-set'
+      #   required: false
+      #   type: string
+      # reviewed_image:
+      #   description: 'The ID of the image that will be converted'
+      #   default: 'not-set'
+      #   required: false
+      #   type: string
+      release-type:
+        description: 'Release type: major, minor, patch, premajor, preminor, prepatch, prerelease, pretoprod. Defaults to patch. '
+        default: 'patch'
+        required: false
+        type: string
+      # reviewed-image:
+      #   description: 'The ID of the image that will be converted'
+      #   default: 'not-set'
+      #   required: true
+      #   type: string
+      preid:
+        description: 'Pre-release identifier (only for pre-release builds). Defaults to rc. '
+        default: 'rc'
+        required: false
+        type: string
+      verbose:
+        description: 'Determine if the workflow should run verbose tasks. Defaults to false. '
+        default: 'false'
+        required: false
+        type: string
+
+    # Secrets
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+    secrets:
+      access-token:
+        description: 'A token passed from the caller workflow'
+        required: false
+      # app-id:
+      #   description: 'The GitHub APP ID'
+      #   required: false
+      # app-key:
+      #   description: 'The GitHub APP Key'
+      #   required: false
+      # bot-uid:
+      #   description: 'The UID of the GitHub Bot'
+      #   required: false
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    # Map the workflow outputs to job outputs
+    outputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      job-status:
+        description: 'the status of the reuse-get-info job'
+        value: ${{ jobs.reuse-get-info.outputs.job-status }}
+      # output from the 'repo-version-info' step
+      latest-release:
+        description: 'the latest-release from the repo-version-info action'
+        value: ${{ jobs.reuse-get-info.outputs.latest-release }}
+      latest-tag:
+        description: 'the latest-tag from the repo-version-info action'
+        value: ${{ jobs.reuse-get-info.outputs.latest-tag }}
+      # output from the 'get-next-semver' step
+      current-tag:
+        description: 'the current-tag from the get-next-semver action'
+        value: ${{ jobs.reuse-get-info.outputs.current-tag }}
+      current-version:
+        description: 'the current-version from the get-next-semver action'
+        value: ${{ jobs.reuse-get-info.outputs.current-version }}
+      next-version:
+        description: 'the next-version from the get-next-semver action'
+        value: ${{ jobs.reuse-get-info.outputs.next-version }}
+      is-next-prerelease:
+        description: 'the is-next-prerelease from the get-next-semver action'
+        value: ${{ jobs.reuse-get-info.outputs.is-next-prerelease }}
+
+permissions:
+  contents: read
+  #contents: write
+  # issues: write
+  # pull-requests: write
+
+jobs:
+  reuse-get-info:
+    #name: Info for ${{ inputs.release-type }} release
+    runs-on: ubuntu-latest
+    outputs:
+      job-status: ${{ job.status }}
+      # output from the 'repo-version-info' step
+      latest-release: ${{ steps.repo-version-info.outputs.latest-release }}
+      latest-tag: ${{ steps.repo-version-info.outputs.latest-tag }}
+      # output from the 'get-next-semver' step
+      current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+      current-version: ${{ steps.get-next-semver.outputs.current-version }}
+      next-version: ${{ steps.get-next-semver.outputs.next-version }}
+      is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+      ##
+    env:
+      VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+    steps:
+      # The app token should be created in the caller workflow
+      # # https://github.com/actions/create-github-app-token
+      # - name: Creating a GitHub App Token from actions/create-github-app-token
+      #   #uses: actions/create-github-app-token@v1
+      #   uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+      #   id: app-token
+      #   with:
+      #     # required
+      #     app-id: ${{ secrets.app-id }}
+      #     private-key: ${{ secrets.app-key }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          #ref: ${{ github.head_ref }}
+          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.access-token }}
+
+      - name: repo-version-info | Run rwaight/actions git/repo-version-info
+        id: repo-version-info
+        uses: rwaight/actions/git/repo-version-info@main
+        with:
+          #gh-token: ${{ secrets.GITHUB_TOKEN }}
+          #gh-token: ${{ steps.app-token.outputs.token }}
+          gh-token: ${{ secrets.access-token }}
+
+      - name: repo-version-info | Print outputs
+        id: print-repo-info
+        if: |
+          ${{ steps.repo-version-info.outputs.latest-tag }} || 
+          ${{ steps.repo-version-info.outputs.latest-release }}
+        run: |
+          ## Print repo version information
+          echo "Here is the info from the repo-version-info step: "
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          ##
+          echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
+      - name: get-next-semver | Run rwaight/actions test/get-next-semver
+        id: get-next-semver
+        #continue-on-error: true
+        uses: rwaight/actions/test/get-next-semver@main
+        with:
+          #gh-token: ${{ steps.app-token.outputs.token }}
+          gh-token: ${{ secrets.access-token }}
+          pre-release-id: ${{ inputs.preid }}
+          release-type: ${{ inputs.release-type }}
+          action-verbose: true
+
+      - name: get-next-semver | Print outputs
+        if: ${{ steps.get-next-semver.outputs.next-version }}
+        run: |
+          ## Report the output from the get-next-semver step
+          echo "The output from the 'get-next-semver' step was: "
+          echo "- current tag       : ${{ env.current-tag }} "
+          echo "- current version   : ${{ env.current-version }} "
+          echo "- next version      : ${{ env.next-version }} "
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} "
+          ##
+          echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        env:
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+
+      # # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # - name: Set up git config
+      #   id: set-up-git
+      #   run: |
+      #     ## Run 'git --version' then 'git config'
+      #     git --version
+      #     ## Configure git to login as the ${{ inputs.bot-name }}.
+      #     echo "going to run 'git config' for the ${{ inputs.bot-name }} bot"
+      #     git config user.name ${{ inputs.bot-name }}[bot]
+      #     git config user.email ${{ secrets.bot-uid }}+${{ inputs.bot-name }}[bot]@users.noreply.github.com
+      #     echo "the 'set-up-git' step has completed. "
+
+      # - name: Ensure 'actions:autorelease' label exists
+      #   run: |
+      #     LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
+      #     if [[ -z "$LABEL" ]]; then
+      #       echo "Creating 'actions:autorelease' label"
+      #       gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
+      #     else
+      #       echo "the 'actions:autorelease' label already exists"
+      #     fi
+      #   env:
+      #     #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     #GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      #     GITHUB_TOKEN: ${{ secrets.access-token }}
+
+      # - name: Ensure 'version:${{ inputs.release-type }}' label exists
+      #   run: |
+      #     LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="version:${{ inputs.release-type }}")')
+      #     if [[ -z "$LABEL" ]]; then
+      #       echo "Creating 'version:${{ inputs.release-type }}' label"
+      #       gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="version:${{ inputs.release-type }}" -f color="baa938" -f description="Related to a ''${{ inputs.release-type }}'' version release"
+      #     else
+      #       echo "the 'version:${{ inputs.release-type }}' label already exists"
+      #     fi
+      #   env:
+      #     #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     #GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      #     GITHUB_TOKEN: ${{ secrets.access-token }}
