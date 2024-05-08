@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/rwaight/test-actions/compare/0.2.5...HEAD)
+## [Unreleased](https://github.com/rwaight/test-actions/compare/0.2.4...HEAD)
 
 ## [0.2.2](https://github.com/rwaight/test-actions/compare/v0.2.1...v0.2.2) - 2024-03-14
 
@@ -50,14 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0](https://github.com/rwaight/test-actions/releases/tag/v0.1.0) - 2024-03-11
 
 - Initial draft of the GitHub test actions monorepo
-
-## [0.2.5](https://github.com/rwaight/test-actions/compare/0.2.4...0.2.5) - 2024-05-08
-
-GitHub Actions Monorepo, version 0.2.5
-
-### Changes
-
-**Full Changelog**: https://github.com/rwaight/test-actions/compare/v0.2.4...v0.2.5
 
 ## [0.2.4](https://github.com/rwaight/test-actions/compare/v0.2.3...0.2.4) - 2024-05-08
 
