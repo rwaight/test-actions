@@ -126,6 +126,7 @@ jobs:
           echo "The output from the 'get-next-semver' step was: "
           echo "- current tag       : ${{ env.current-tag }} "
           echo "- current version   : ${{ env.current-version }} "
+          echo "- next tag          : ${{ env.next-tag }} "
           echo "- next version      : ${{ env.next-version }} "
           echo "- is next prerelease: ${{ env.is-next-prerelease }} "
           ##
@@ -133,12 +134,14 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
           echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
           echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next tag          : ${{ env.next-tag }} " >> $GITHUB_STEP_SUMMARY
           echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
           echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
         env:
           current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
           current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
@@ -190,7 +193,8 @@ jobs:
         uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
         with:
           json-file: 'my-test-custom-variables.json'
-          vars-field: 'other_var_02'
+          #vars-field: 'other_var_02'
+          vars-field: 'my_test_version'
           #gh-token: ${{ steps.app-token.outputs.token }}
           vars-new-value: ${{ steps.get-next-semver.outputs.next-version }}
           action-verbose: true
@@ -205,37 +209,37 @@ jobs:
           previous-value: ${{ steps.update-json-field.outputs.previous-value }}
           new-value: ${{ steps.update-json-field.outputs.new-value }}
 
-      - name: bump-json-version | Run rwaight/actions test/bump-json-version
-        id: bump-json-version
-        continue-on-error: true
-        #uses: rwaight/actions/test/bump-json-version@main
-        uses: rwaight/actions/test/bump-json-version@dev-rw-202405-v16
-        with:
-          author-name: rw-actions-bot[bot]
-          author-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          committer-name: rw-actions-bot[bot]
-          committer-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          default-author: github_actions
-          json-vars-file: 'my-test-custom-variables.json'
-          json-vars-field: 'my_custom_version'
-          gh-token: ${{ steps.app-token.outputs.token }}
-          release-type: ${{ inputs.release-type }}
-          release-version: ${{ steps.get-next-semver.outputs.next-version }}
-          action-verbose: true
+      # - name: bump-json-version | Run rwaight/actions test/bump-json-version
+      #   id: bump-json-version
+      #   continue-on-error: true
+      #   #uses: rwaight/actions/test/bump-json-version@main
+      #   uses: rwaight/actions/test/bump-json-version@dev-rw-202405-v16
+      #   with:
+      #     author-name: rw-actions-bot[bot]
+      #     author-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     committer-name: rw-actions-bot[bot]
+      #     committer-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     default-author: github_actions
+      #     json-vars-file: 'my-test-custom-variables.json'
+      #     json-vars-field: 'my_custom_version'
+      #     gh-token: ${{ steps.app-token.outputs.token }}
+      #     release-type: ${{ inputs.release-type }}
+      #     release-version: ${{ steps.get-next-semver.outputs.next-version }}
+      #     action-verbose: true
 
-      - name: bump-json-version | Print outputs
-        if: ${{ steps.bump-json-version.outputs.next-release-version }}
-        run: |
-          echo "The output from the 'bump-json-version' step was: "
-          echo "current release version: ${{ env.current-release-version }} "
-          echo "next release version: ${{ env.next-release-version }} "
-          echo "old json version: ${{ env.old-json-version }} "
-          echo "new json version: ${{ env.new-json-version }} "
-        env:
-          current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
-          next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
-          old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
-          new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
+      # - name: bump-json-version | Print outputs
+      #   if: ${{ steps.bump-json-version.outputs.next-release-version }}
+      #   run: |
+      #     echo "The output from the 'bump-json-version' step was: "
+      #     echo "current release version: ${{ env.current-release-version }} "
+      #     echo "next release version: ${{ env.next-release-version }} "
+      #     echo "old json version: ${{ env.old-json-version }} "
+      #     echo "new json version: ${{ env.new-json-version }} "
+      #   env:
+      #     current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
+      #     next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
+      #     old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
+      #     new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: release-drafter | Run rwaight/actions release-drafter
