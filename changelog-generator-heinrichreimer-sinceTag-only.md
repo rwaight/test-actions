@@ -1,20 +1,14 @@
 # Changelog
 
-## [0.2.4](https://github.com/rwaight/test-actions/tree/0.2.4) (2024-05-08)
+## [0.2.5](https://github.com/rwaight/test-actions/tree/0.2.5) (2024-05-08)
 
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0...0.2.4)
+[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.4...0.2.5)
 
 **Merged pull requests:**
 
-- test: updates for autorelease from autorelease/test 02 [\#66](https://github.com/rwaight/test-actions/pull/66) ([rwaight](https://github.com/rwaight))
-- test: update autorelease/test 01 [\#61](https://github.com/rwaight/test-actions/pull/61) ([rwaight](https://github.com/rwaight))
-- fix: options sent to bump-json-version [\#60](https://github.com/rwaight/test-actions/pull/60) ([rwaight](https://github.com/rwaight))
-- fix: check for label in prepare-release [\#59](https://github.com/rwaight/test-actions/pull/59) ([rwaight](https://github.com/rwaight))
-- update autorelease workflows [\#57](https://github.com/rwaight/test-actions/pull/57) ([rwaight](https://github.com/rwaight))
-
-## [v0](https://github.com/rwaight/test-actions/tree/v0) (2024-05-06)
-
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.3...v0)
+- refactor: update conditionals [\#80](https://github.com/rwaight/test-actions/pull/80) ([rwaight](https://github.com/rwaight))
+- feat: updates for autorelease from autorelease/test 03 [\#78](https://github.com/rwaight/test-actions/pull/78) ([rwaight](https://github.com/rwaight))
+- test: create pr merged test workflow [\#71](https://github.com/rwaight/test-actions/pull/71) ([rwaight](https://github.com/rwaight))
 
 
 
