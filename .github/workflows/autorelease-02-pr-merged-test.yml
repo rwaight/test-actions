@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      startsWith(github.event.pull_request.head.ref, 'autorelease/v) && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
       contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
     outputs:
       token: ${{ steps.app-token.outputs.token }}
@@ -40,7 +40,7 @@ jobs:
     needs: [get-token]
     if: |
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      startsWith(github.event.pull_request.head.ref, 'autorelease/v) && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
       contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
     outputs:
       release-version: ${{ steps.get-release-version.outputs.release-version }}
@@ -111,7 +111,7 @@ jobs:
     needs: [get-token, branch-info]
     if: |
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      startsWith(github.event.pull_request.head.ref, 'autorelease/v) && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
       contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
     secrets:
        #token: ${{ secrets.access-token }}
