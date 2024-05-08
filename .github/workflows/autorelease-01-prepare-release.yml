@@ -24,10 +24,10 @@ on:
         default: 'not-set'
         required: true
         type: string
-      preid:
-        description: 'Pre-release identifier (only for pre-release builds)'
-        default: rc
-        required: false
+      # preid:
+      #   description: 'Pre-release identifier (only for pre-release builds)'
+      #   default: rc
+      #   required: false
 
 permissions:
   #contents: read
@@ -47,6 +47,7 @@ jobs:
       # output from the 'get-next-semver' step
       current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
       current-version: ${{ steps.get-next-semver.outputs.current-version }}
+      next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
       next-version: ${{ steps.get-next-semver.outputs.next-version }}
       is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
       # output from the 'bump-json-version' step
@@ -126,6 +127,7 @@ jobs:
           echo "The output from the 'get-next-semver' step was: "
           echo "- current tag       : ${{ env.current-tag }} "
           echo "- current version   : ${{ env.current-version }} "
+          echo "- next tag          : ${{ env.next-tag }} "
           echo "- next version      : ${{ env.next-version }} "
           echo "- is next prerelease: ${{ env.is-next-prerelease }} "
           ##
@@ -133,12 +135,14 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
           echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
           echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next tag          : ${{ env.next-tag }} " >> $GITHUB_STEP_SUMMARY
           echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
           echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
         env:
           current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
           current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
@@ -183,36 +187,60 @@ jobs:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
-      - name: bump-json-version | Run rwaight/actions test/bump-json-version
-        id: bump-json-version
-        #uses: rwaight/actions/test/bump-json-version@main
-        uses: rwaight/actions/test/bump-json-version@dev-rw-202405-v16
+      - name: update-json-field | Run rwaight/actions test/update-json-field
+        id: update-json-field
+        continue-on-error: true
+        uses: rwaight/actions/test/update-json-field@main
+        #uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
         with:
-          author-name: rw-actions-bot[bot]
-          author-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          committer-name: rw-actions-bot[bot]
-          committer-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          default-author: github_actions
-          json-vars-file: 'my-test-custom-variables.json'
-          json-vars-field: 'my_custom_version'
-          gh-token: ${{ steps.app-token.outputs.token }}
-          #release-type: ${{ inputs.release-type }}
-          release-version: ${{ steps.get-next-semver.outputs.next-version }}
+          json-file: 'my-test-custom-variables.json'
+          #vars-field: 'other_var_02'
+          vars-field: 'my_custom_version'
+          #gh-token: ${{ steps.app-token.outputs.token }}
+          vars-new-value: ${{ steps.get-next-semver.outputs.next-version }}
           action-verbose: true
 
-      - name: bump-json-version | Print outputs
-        if: ${{ steps.bump-json-version.outputs.next-release-version }}
+      - name: update-json-field | Print outputs
+        if: ${{ steps.update-json-field.outputs.new-value }}
         run: |
-          echo "The output from the 'bump-json-version' step was: "
-          echo "current release version: ${{ env.current-release-version }} "
-          echo "next release version: ${{ env.next-release-version }} "
-          echo "old json version: ${{ env.old-json-version }} "
-          echo "new json version: ${{ env.new-json-version }} "
+          echo "The output from the 'update-json-field' step was: "
+          echo "previous value: ${{ env.previous-value }} "
+          echo "new value     : ${{ env.new-value }} "
         env:
-          current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
-          next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
-          old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
-          new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
+          previous-value: ${{ steps.update-json-field.outputs.previous-value }}
+          new-value: ${{ steps.update-json-field.outputs.new-value }}
+
+      # - name: bump-json-version | Run rwaight/actions test/bump-json-version
+      #   id: bump-json-version
+      #   continue-on-error: true
+      #   #uses: rwaight/actions/test/bump-json-version@main
+      #   uses: rwaight/actions/test/bump-json-version@dev-rw-202405-v16
+      #   with:
+      #     author-name: rw-actions-bot[bot]
+      #     author-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     committer-name: rw-actions-bot[bot]
+      #     committer-email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     default-author: github_actions
+      #     json-vars-file: 'my-test-custom-variables.json'
+      #     json-vars-field: 'my_custom_version'
+      #     gh-token: ${{ steps.app-token.outputs.token }}
+      #     release-type: ${{ inputs.release-type }}
+      #     release-version: ${{ steps.get-next-semver.outputs.next-version }}
+      #     action-verbose: true
+
+      # - name: bump-json-version | Print outputs
+      #   if: ${{ steps.bump-json-version.outputs.next-release-version }}
+      #   run: |
+      #     echo "The output from the 'bump-json-version' step was: "
+      #     echo "current release version: ${{ env.current-release-version }} "
+      #     echo "next release version: ${{ env.next-release-version }} "
+      #     echo "old json version: ${{ env.old-json-version }} "
+      #     echo "new json version: ${{ env.new-json-version }} "
+      #   env:
+      #     current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
+      #     next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
+      #     old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
+      #     new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: release-drafter | Run rwaight/actions release-drafter
@@ -223,10 +251,11 @@ jobs:
         with:
           config-name: release-template_monorepo-test-actions.yml # located in .github/ in default branch
           version: ${{ steps.get-next-semver.outputs.next-version }}
+          tag: ${{ steps.get-next-semver.outputs.next-tag }}
           #prerelease-identifier: ${{ inputs.preid }}
           prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
           # https://github.com/release-drafter/release-drafter/pull/1302
-          include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+          ####need to update###include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
           #include-pre-releases: true
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -339,7 +368,7 @@ jobs:
           ## Update the '${{ env.vars-file }}' file 
           echo "Starting the 'update-vars-file' step... "
           echo "  updating the 'my_release_type' field with the user provided release-type"
-          tmp1=$(mktemp1)
+          tmp1=$(mktemp)
           jq '.my_release_type = "${{ env.release-type }}"' ${{ env.vars-file }} > "$tmp1" && mv "$tmp1" ${{ env.vars-file }}
           echo "    the jq command has finished "
           echo "  checking the value of the 'my_release_type' field "
@@ -348,7 +377,7 @@ jobs:
           echo ""
           #
           echo "updating the 'my_reviewed_image' field with the user provided reviewed-image"
-          tmp2=$(mktemp2)
+          tmp2=$(mktemp)
           jq '.my_reviewed_image = "${{ env.reviewed-image }}"' ${{ env.vars-file }} > "$tmp2" && mv "$tmp2" ${{ env.vars-file }}
           echo "    the jq command has finished "
           echo "  checking the value of the 'my_reviewed_image' field "
@@ -359,29 +388,32 @@ jobs:
           echo "Finishing the 'update-vars-file' step... "
         env:
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
           vars-file: my-test-custom-variables.json
           release-type: ${{ inputs.release-type }}
           reviewed-image: ${{ inputs.reviewed-image }}
 
-      - name: Commit changes to the '${{ env.vars-file }}' file
-        id: commit-vars-file-changes
-        # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
-        #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
-        #uses: stefanzweifel/git-auto-commit-action@v4
-        #uses: EndBug/add-and-commit@v9
-        uses: rwaight/actions/git/add-and-commit@main
-        with:
-          add: ${{ env.vars-file }}
-          author_name: rw-actions-bot[bot]
-          author_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          commit: --signoff
-          committer_name: rw-actions-bot[bot]
-          committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          default_author: user_info
-          message: 'chore(vars-json): update the release-type and reviewed-image for the ${{ inputs.release-type }} release'
-        env:
-          next-version: ${{ steps.get-next-semver.outputs.next-version }}
-          vars-file: my-test-custom-variables.json
+      # this is not on the branch used for the autorelease PR, so do not commit and push them
+      #   need to see if the 'git/add-and-commit' supports commit without push?
+      # - name: Commit changes to the '${{ env.vars-file }}' file
+      #   id: commit-vars-file-changes
+      #   # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
+      #   #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
+      #   #uses: stefanzweifel/git-auto-commit-action@v4
+      #   #uses: EndBug/add-and-commit@v9
+      #   uses: rwaight/actions/git/add-and-commit@main
+      #   with:
+      #     add: ${{ env.vars-file }}
+      #     author_name: rw-actions-bot[bot]
+      #     author_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     commit: --signoff
+      #     committer_name: rw-actions-bot[bot]
+      #     committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     default_author: user_info
+      #     message: 'chore(vars-json): update the release-type and reviewed-image for the ${{ inputs.release-type }} release'
+      #   env:
+      #     next-version: ${{ steps.get-next-semver.outputs.next-version }}
+      #     vars-file: my-test-custom-variables.json
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: run release-flow/keep-a-changelog-action from rwaight import
@@ -424,7 +456,8 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4
         with:
           fromTag: ${{ steps.get-next-semver.outputs.current-version }}
-          toTag: ${{ steps.get-next-semver.outputs.next-version }}
+          #toTag: ${{ steps.get-next-semver.outputs.next-version }}
+          toTag: ${{ steps.get-next-semver.outputs.next-tag }}
           # https://github.com/mikepenz/release-changelog-builder-action?tab=readme-ov-file#action-inputsoutputs
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
@@ -485,7 +518,8 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           output: ./changelog-generator-heinrichreimer-sinceTag-and-dueTag.md
           sinceTag: ${{ steps.get-next-semver.outputs.current-version }}
-          dueTag: ${{ steps.get-next-semver.outputs.next-version }}
+          #dueTag: ${{ steps.get-next-semver.outputs.next-version }}
+          dueTag: ${{ steps.get-next-semver.outputs.next-tag }}
           # might need to set 'futureRelease'
           # Put the unreleased changes in the specified release number.
           # This will replace Unreleased section with the specified tag. Handy for generating change logs before tagging.
@@ -536,7 +570,7 @@ jobs:
         #uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
         uses: rwaight/actions/github/create-pull-request@main
         with:
-          commit-message: 'chore: changelog for release ${{ steps.get-next-semver.outputs.next-version }}'
+          commit-message: 'chore: changelog for release ${{ steps.get-next-semver.outputs.next-tag }}'
           add-paths: |
             ./*.txt
             ./*.md
@@ -545,9 +579,9 @@ jobs:
           #committer: 'releasebot <noreply@github.com>'
           committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
           #branch: 'autorelease/test-run-${{ github.run_id }}/${{ steps.get-next-semver.outputs.next-version }}'
-          branch: 'autorelease/${{ steps.get-next-semver.outputs.next-version }}'
+          branch: 'autorelease/${{ steps.get-next-semver.outputs.next-tag }}'
           #base: 'main'
-          title: '[autorelease] test release ${{ steps.get-next-semver.outputs.next-version }}'
+          title: '[autorelease] test release ${{ steps.get-next-semver.outputs.next-tag }}'
           # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
           # contents of the release notes don't get chomped. See https://yaml-multiline.info/
           body: |
@@ -559,7 +593,7 @@ jobs:
 
             ## Release notes
 
-            The changes in this PR prepare for release ${{ steps.get-next-semver.outputs.next-version }}. 
+            The changes in this PR prepare for release ${{ steps.get-next-semver.outputs.next-tag }}. 
             
             A release draft has been created, please review it as part of the release process: ${{ steps.release-drafter.outputs.html_url }}
 
@@ -593,7 +627,7 @@ jobs:
     if: (github.repository_owner == 'rwaight')
     with:
       build_method: 'to-main'
-      build_version: ${{ needs.prepare-release.outputs.next-version }}
+      build_version: ${{ needs.prepare-release.outputs.next-tag }}
       create_image: 'false'
       reviewed_image: ${{ inputs.reviewed-image }}
       #release_type: ${{ inputs.release-type }}
@@ -610,6 +644,7 @@ jobs:
       # output from the 'get-next-semver' step
       current-tag: ${{ needs.prepare-release.outputs.current-tag }}
       current-version: ${{ needs.prepare-release.outputs.current-version }}
+      next-tag: ${{ needs.prepare-release.outputs.next-tag }}
       next-version: ${{ needs.prepare-release.outputs.next-version }}
       is-next-prerelease: ${{ needs.prepare-release.outputs.is-next-prerelease }}
       # output from the 'bump-json-version' step
@@ -649,6 +684,7 @@ jobs:
           echo "output from the 'get-next-semver' step "
           echo "  current-tag: ${{ needs.prepare-release.outputs.current-tag }} "
           echo "  current-version: ${{ needs.prepare-release.outputs.current-version }} "
+          echo "  next-tag: ${{ needs.prepare-release.outputs.next-tag }} "
           echo "  next-version: ${{ needs.prepare-release.outputs.next-version }} "
           echo "  is-next-prerelease: ${{ needs.prepare-release.outputs.is-next-prerelease }} "
           echo ""
@@ -659,15 +695,15 @@ jobs:
           echo "  new-json-version: ${{ needs.prepare-release.outputs.new-json-version }} "
           echo ""
           echo "output from the 'release-drafter' step "
-          echo "  release-id: ${{ needs.prepare-release.outputs.id }} "
-          echo "  release-name: ${{ needs.prepare-release.outputs.name }} "
-          echo "  release-tag-name: ${{ needs.prepare-release.outputs.tag_name }} "
-          echo "  release-html-url: ${{ needs.prepare-release.outputs.html_url }} "
-          echo "  release-upload-url: ${{ needs.prepare-release.outputs.upload_url }} "
-          echo "  release-major-version: ${{ needs.prepare-release.outputs.major_version }} "
-          echo "  release-minor-version: ${{ needs.prepare-release.outputs.minor_version }} "
-          echo "  release-patch-version: ${{ needs.prepare-release.outputs.patch_version }} "
-          echo "  release-resolved-version: ${{ needs.prepare-release.outputs.resolved_version }} "
+          echo "  release-id: ${{ needs.prepare-release.outputs.release-id }} "
+          echo "  release-name: ${{ needs.prepare-release.outputs.release-name }} "
+          echo "  release-tag-name: ${{ needs.prepare-release.outputs.release-tag-name }} "
+          echo "  release-html-url: ${{ needs.prepare-release.outputs.release-html-url }} "
+          echo "  release-upload-url: ${{ needs.prepare-release.outputs.release-upload-url }} "
+          echo "  release-major-version: ${{ needs.prepare-release.outputs.release-major-version }} "
+          echo "  release-minor-version: ${{ needs.prepare-release.outputs.release-minor-version }} "
+          echo "  release-patch-version: ${{ needs.prepare-release.outputs.release-patch-version }} "
+          echo "  release-resolved-version: ${{ needs.prepare-release.outputs.release-resolved-version }} "
           echo ""
 
       - name: Print outputs from the 'call-build' job
