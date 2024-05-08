@@ -14,6 +14,21 @@ permissions:
 
 jobs:
 
+  not-applicable:
+    # do nothing else because this is not an autorelease branch
+    #name: do nothing else because this is not an autorelease branch
+    runs-on: ubuntu-latest
+    if: |
+      !(contains(github.event.pull_request.labels.*.name, 'actions:autorelease')) && 
+      !(startsWith(github.event.pull_request.head.ref, 'autorelease'))
+    steps:
+
+      - name: Nothing to do, this is not an autorelease branch
+        id: print-something
+        run: |
+          # Nothing to do, this is not an autorelease branch
+          echo "nothing else will run, this is not an autorelease branch"
+
   get-token:
     #name: Get the app token
     runs-on: ubuntu-latest
