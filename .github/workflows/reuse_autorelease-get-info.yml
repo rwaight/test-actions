@@ -64,15 +64,16 @@ on:
     # Secrets
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
     secrets:
-      access-token:
-        description: 'A token passed from the caller workflow'
+      #not passing the 'access-token' secret to this workflow# see the notes in the create app token step below
+      #access-token:
+      #  description: 'A token passed from the caller workflow'
+      #  required: false
+      app-id:
+        description: 'The GitHub APP ID'
         required: false
-      # app-id:
-      #   description: 'The GitHub APP ID'
-      #   required: false
-      # app-key:
-      #   description: 'The GitHub APP Key'
-      #   required: false
+      app-key:
+        description: 'The GitHub APP Key'
+        required: false
       # bot-uid:
       #   description: 'The UID of the GitHub Bot'
       #   required: false
@@ -131,31 +132,48 @@ jobs:
       VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
     steps:
       # The app token should be created in the caller workflow
-      # # https://github.com/actions/create-github-app-token
-      # - name: Creating a GitHub App Token from actions/create-github-app-token
-      #   #uses: actions/create-github-app-token@v1
-      #   uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
-      #   id: app-token
-      #   with:
-      #     # required
-      #     app-id: ${{ secrets.app-id }}
-      #     private-key: ${{ secrets.app-key }}
+      # # Unable to generate the app-token in a separate job... at least not for now.
+      # # GitHub does not currently support allowing a secret to be 'output' from a job
+      # # See the following:
+      # #   https://github.com/actions/create-github-app-token/issues/66
+      # #   https://github.com/github/docs/pull/29386
+      # #   https://stackoverflow.com/questions/77133185/share-generated-github-token-within-different-jobs-on-github-actions
+      # #   https://github.com/actions/runner/issues/1498
+      # #   https://github.com/orgs/community/discussions/13082
+      # #   https://github.com/orgs/community/discussions/29880
+      # #   https://github.com/orgs/community/discussions/66044
+      # #   https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+      # #   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+      # #   https://stackoverflow.com/questions/73476075/how-to-not-mask-output-in-github-actions
+      # #   
+      # # Options, if this needs to be done (but does it?)
+      # #   https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
+      # #  
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.app-key }}
 
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
           #ref: ${{ github.head_ref }}
-          #token: ${{ steps.app-token.outputs.token }}
-          token: ${{ secrets.access-token }}
+          token: ${{ steps.app-token.outputs.token }}
+          #not passing the 'access-token' secret to this workflow#token: ${{ secrets.access-token }}
 
       - name: repo-version-info | Run rwaight/actions git/repo-version-info
         id: repo-version-info
         uses: rwaight/actions/git/repo-version-info@main
         with:
           #gh-token: ${{ secrets.GITHUB_TOKEN }}
-          #gh-token: ${{ steps.app-token.outputs.token }}
-          gh-token: ${{ secrets.access-token }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+          #not passing the 'access-token' secret to this workflow#gh-token: ${{ secrets.access-token }}
 
       - name: repo-version-info | Print outputs
         id: print-repo-info
@@ -179,8 +197,8 @@ jobs:
         #continue-on-error: true
         uses: rwaight/actions/test/get-next-semver@main
         with:
-          #gh-token: ${{ steps.app-token.outputs.token }}
-          gh-token: ${{ secrets.access-token }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+          #not passing the 'access-token' secret to this workflow#gh-token: ${{ secrets.access-token }}
           pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
           action-verbose: true
