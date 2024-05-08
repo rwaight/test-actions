@@ -76,7 +76,8 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
       startsWith(github.event.pull_request.head.ref, 'autorelease')
     outputs:
-      token: ${{ steps.app-token.outputs.token }}
+      #token: ${{ steps.app-token.outputs.token }}
+      token: ${{ steps.set-secret.outputs.token }}
     steps:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
@@ -86,6 +87,32 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # do not revoke the token when the 'get-token' job is complete
+          skip-token-revoke: true
+          # https://github.com/actions/create-github-app-token?tab=readme-ov-file#skip-token-revoke
+
+      - name: Mask and output the app-token as a secret
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+        id: set-secret
+        run: |
+          app-token=${{ steps.app-token.outputs.token }}
+          echo "::add-mask::$app-token"
+          echo "token=$app-token" >> "$GITHUB_OUTPUT"
+
+      # # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+      # - uses: some/secret-store@v1
+      #   with:
+      #     credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
+      #     instance: ${{ secrets.SECRET_STORE_INSTANCE }}
+      # - name: generate secret
+      #   id: generate-secret
+      #   shell: bash
+      #   run: |
+      #     GENERATED_SECRET=$((RANDOM))
+      #     echo "::add-mask::$GENERATED_SECRET"
+      #     SECRET_HANDLE=$(secret-store store-secret "$GENERATED_SECRET")
+      #     echo "handle=$SECRET_HANDLE" >> "$GITHUB_OUTPUT"
 
       - name: Verbose | Output the runner environment and GitHub context
         id: verbose-print-env-and-context
