@@ -386,25 +386,27 @@ jobs:
           release-type: ${{ inputs.release-type }}
           reviewed-image: ${{ inputs.reviewed-image }}
 
-      - name: Commit changes to the '${{ env.vars-file }}' file
-        id: commit-vars-file-changes
-        # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
-        #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
-        #uses: stefanzweifel/git-auto-commit-action@v4
-        #uses: EndBug/add-and-commit@v9
-        uses: rwaight/actions/git/add-and-commit@main
-        with:
-          add: ${{ env.vars-file }}
-          author_name: rw-actions-bot[bot]
-          author_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          commit: --signoff
-          committer_name: rw-actions-bot[bot]
-          committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
-          default_author: user_info
-          message: 'chore(vars-json): update the release-type and reviewed-image for the ${{ inputs.release-type }} release'
-        env:
-          next-version: ${{ steps.get-next-semver.outputs.next-version }}
-          vars-file: my-test-custom-variables.json
+      # this is not on the branch used for the autorelease PR, so do not commit and push them
+      #   need to see if the 'git/add-and-commit' supports commit without push?
+      # - name: Commit changes to the '${{ env.vars-file }}' file
+      #   id: commit-vars-file-changes
+      #   # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
+      #   #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
+      #   #uses: stefanzweifel/git-auto-commit-action@v4
+      #   #uses: EndBug/add-and-commit@v9
+      #   uses: rwaight/actions/git/add-and-commit@main
+      #   with:
+      #     add: ${{ env.vars-file }}
+      #     author_name: rw-actions-bot[bot]
+      #     author_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     commit: --signoff
+      #     committer_name: rw-actions-bot[bot]
+      #     committer_email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     default_author: user_info
+      #     message: 'chore(vars-json): update the release-type and reviewed-image for the ${{ inputs.release-type }} release'
+      #   env:
+      #     next-version: ${{ steps.get-next-semver.outputs.next-version }}
+      #     vars-file: my-test-custom-variables.json
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: run release-flow/keep-a-changelog-action from rwaight import
