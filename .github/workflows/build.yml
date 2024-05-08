@@ -95,6 +95,15 @@ on:
   schedule:
     - cron: '15 18 * * 2'  # once a week on Tuesday at 18:15 UTC, https://www.timeanddate.com/worldclock/timezone/utc
 
+# https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  #cancel-in-progress: true
+  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
+  #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
+  #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
+
 env:
   build_method: ${{ inputs.build_method || 'to-dev' }}
   build_version: ${{ inputs.build_version }}
