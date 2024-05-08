@@ -114,8 +114,8 @@ jobs:
       startsWith(github.event.pull_request.head.ref, 'autorelease') && 
       contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
     secrets:
-       #token: ${{ secrets.access-token }}
-       token: ${{ needs.get-token.outputs.token }}
+       #access-token: ${{ secrets.access-token }}
+       access-token: ${{ needs.get-token.outputs.token }}
     #secrets: inherit
     with:
       release-type: ${{ needs.branch-info.outputs.release-type }}
