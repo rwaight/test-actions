@@ -1,8 +1,9 @@
 {
-    "my_custom_version": "0.2.2",
-    "my_release_type": "asdf",
-    "my_reviewed_image": "asdf",
-    "other_var_01": "asdf",
-    "other_var_02": "1234",
-    "other_var_03": 5678
+  "my_custom_version": "0.2.2",
+  "my_release_type": "major",
+  "my_reviewed_image": "not-set",
+  "other_var_01": "asdf",
+  "other_var_02": "1234",
+  "other_var_03": 5678,
+  "my_test_version": "1.0.0"
 }

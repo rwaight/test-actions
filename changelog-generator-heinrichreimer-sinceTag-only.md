@@ -1,38 +1,19 @@
 # Changelog
 
-## [v0.2.3](https://github.com/rwaight/test-actions/tree/v0.2.3) (2024-05-03)
+## [1.0.0](https://github.com/rwaight/test-actions/tree/1.0.0) (2024-05-08)
 
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0...v0.2.3)
-
-**Implemented enhancements:**
-
-- Create actions-ci workflow [\#29](https://github.com/rwaight/test-actions/pull/29) ([rwaight](https://github.com/rwaight))
-- Add repo-version-info action [\#27](https://github.com/rwaight/test-actions/pull/27) ([rwaight](https://github.com/rwaight))
+[Full Changelog](https://github.com/rwaight/test-actions/compare/v0...1.0.0)
 
 **Merged pull requests:**
 
-- refactor: use proper autorelease branch name [\#55](https://github.com/rwaight/test-actions/pull/55) ([rwaight](https://github.com/rwaight))
-- \[autorelease\] test release v0.2.3 [\#54](https://github.com/rwaight/test-actions/pull/54) ([rw-actions-bot[bot]](https://github.com/apps/rw-actions-bot))
-- fix: heinrichreimer action-github-changelog-generator [\#53](https://github.com/rwaight/test-actions/pull/53) ([rwaight](https://github.com/rwaight))
-- feat: update test autorelease [\#52](https://github.com/rwaight/test-actions/pull/52) ([rwaight](https://github.com/rwaight))
-- refactor: update prepare release and changelog files [\#48](https://github.com/rwaight/test-actions/pull/48) ([rwaight](https://github.com/rwaight))
-- feat: create release notes file [\#35](https://github.com/rwaight/test-actions/pull/35) ([rwaight](https://github.com/rwaight))
-- update prepare release workflow [\#34](https://github.com/rwaight/test-actions/pull/34) ([rwaight](https://github.com/rwaight))
-- test: create new autorelease prepare release workflow [\#33](https://github.com/rwaight/test-actions/pull/33) ([rwaight](https://github.com/rwaight))
-- fix: get-next-semver in prepare-release [\#32](https://github.com/rwaight/test-actions/pull/32) ([rwaight](https://github.com/rwaight))
-- fix: use correct branch for get-next-semver [\#31](https://github.com/rwaight/test-actions/pull/31) ([rwaight](https://github.com/rwaight))
-- Test prepare release v2 [\#30](https://github.com/rwaight/test-actions/pull/30) ([rwaight](https://github.com/rwaight))
-- Add repository\_dispatch to label manager and update PR manager [\#28](https://github.com/rwaight/test-actions/pull/28) ([rwaight](https://github.com/rwaight))
-- Update actions-to-import.md [\#26](https://github.com/rwaight/test-actions/pull/26) ([rwaight](https://github.com/rwaight))
-- Repo labeler and release configuration updates [\#14](https://github.com/rwaight/test-actions/pull/14) ([rwaight](https://github.com/rwaight))
+- test: update autorelease/test 01 [\#61](https://github.com/rwaight/test-actions/pull/61) ([rwaight](https://github.com/rwaight))
+- fix: options sent to bump-json-version [\#60](https://github.com/rwaight/test-actions/pull/60) ([rwaight](https://github.com/rwaight))
+- fix: check for label in prepare-release [\#59](https://github.com/rwaight/test-actions/pull/59) ([rwaight](https://github.com/rwaight))
+- update autorelease workflows [\#57](https://github.com/rwaight/test-actions/pull/57) ([rwaight](https://github.com/rwaight))
 
-## [v0](https://github.com/rwaight/test-actions/tree/v0) (2024-03-14)
+## [v0](https://github.com/rwaight/test-actions/tree/v0) (2024-05-06)
 
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2...v0)
-
-## [v0.2](https://github.com/rwaight/test-actions/tree/v0.2) (2024-03-14)
-
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.2...v0.2)
+[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.3...v0)
 
 
 
