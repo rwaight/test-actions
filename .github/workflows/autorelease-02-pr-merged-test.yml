@@ -5,9 +5,9 @@ run-name: 'test [autorelease] PR merged'
 
 on:
   pull_request:
-    #branches:
-    #  - main
-    #types: [closed]
+    branches:
+      - main
+    types: [closed]
 
 permissions:
   contents: write
@@ -67,106 +67,6 @@ jobs:
         run: |
           # Nothing to do, this is not an autorelease branch
           echo "nothing else will run, this is not an autorelease branch"
-
-  # # Do not generate the app-token in a separate job... at least not for now.
-  # # GitHub does not currently support allowing a secret to be 'output' from a job
-  # # See the following:
-  # #   https://github.com/actions/create-github-app-token/issues/66
-  # #   https://github.com/github/docs/pull/29386
-  # #   https://stackoverflow.com/questions/77133185/share-generated-github-token-within-different-jobs-on-github-actions
-  # #   https://github.com/actions/runner/issues/1498
-  # #   https://github.com/orgs/community/discussions/13082
-  # #   https://github.com/orgs/community/discussions/29880
-  # #   https://github.com/orgs/community/discussions/66044
-  # #   https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
-  # #   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
-  # #   https://stackoverflow.com/questions/73476075/how-to-not-mask-output-in-github-actions
-  # #   
-  # # Options, if this needs to be done (but does it?)
-  # #   https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
-  # #   
-  # get-token:
-  #   #name: Get the app token
-  #   runs-on: ubuntu-latest
-  #   if: |
-  #     contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-  #     startsWith(github.event.pull_request.head.ref, 'autorelease')
-  #   outputs:
-  #     #token: ${{ steps.app-token.outputs.token }}
-  #     token: ${{ steps.set-secret.outputs.token }}
-  #   steps:
-  #     # https://github.com/actions/create-github-app-token
-  #     - name: Creating a GitHub App Token from actions/create-github-app-token
-  #       uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
-  #       id: app-token
-  #       with:
-  #         # required
-  #         app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-  #         private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
-  #         # do not revoke the token when the 'get-token' job is complete
-  #         skip-token-revoke: true
-  #         # https://github.com/actions/create-github-app-token?tab=readme-ov-file#skip-token-revoke
-  #
-  #     - name: Mask and output the app-token as a secret
-  #       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
-  #       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
-  #       id: set-secret
-  #       run: |
-  #         #app-token=${{ steps.app-token.outputs.token }}
-  #         #echo "::add-mask::$app-token"
-  #         echo "::add-mask::${{ steps.app-token.outputs.token }}
-  #         echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
-  #
-  #     # # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
-  #     # - uses: some/secret-store@v1
-  #     #   with:
-  #     #     credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
-  #     #     instance: ${{ secrets.SECRET_STORE_INSTANCE }}
-  #     # - name: generate secret
-  #     #   id: generate-secret
-  #     #   shell: bash
-  #     #   run: |
-  #     #     GENERATED_SECRET=$((RANDOM))
-  #     #     echo "::add-mask::$GENERATED_SECRET"
-  #     #     SECRET_HANDLE=$(secret-store store-secret "$GENERATED_SECRET")
-  #     #     echo "handle=$SECRET_HANDLE" >> "$GITHUB_OUTPUT"
-  #
-  #     - name: Verbose | Output the runner environment and GitHub context
-  #       id: verbose-print-env-and-context
-  #       if: contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
-  #       run: | 
-  #         ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
-  #         ## the double number signs below are for line spacing and readability only
-  #         ##
-  #         echo "starting the 'verbose-print-env-and-context' step. "
-  #         echo ""
-  #         echo "::group::Runner Environment"
-  #         echo "## Runner Environment"
-  #         env | sort
-  #         echo "\n"
-  #         echo "::endgroup::"
-  #         echo ""
-  #         echo "::group::GitHub context"
-  #         echo "## GitHub context"
-  #         echo "$GITHUB_CONTEXT"
-  #         echo "\n"
-  #         echo "::endgroup::"
-  #         echo ""
-  #         ##
-  #         echo "printing other github info:"
-  #         echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
-  #         echo ""
-  #         echo ""
-  #         echo "::group::GitHub labels"
-  #         echo "## GitHub labels"
-  #         echo "$GITHUB_LABELS"
-  #         echo "\n"
-  #         echo "::endgroup::"
-  #         echo ""
-  #         echo "completing the 'verbose-print-env-and-context' step. "
-  #       env:
-  #         GITHUB_CONTEXT: ${{ toJson(github) }}
-  #         GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
 
   branch-info:
     # get information from the autorelease branch
@@ -276,3 +176,105 @@ jobs:
       #preid: rc
       verbose: true
       #release-version: ${{ needs.branch-info.outputs.release-version }}
+
+
+  ###  old 'get-token' job steps are below
+  # # Do not generate the app-token in a separate job... at least not for now.
+  # # GitHub does not currently support allowing a secret to be 'output' from a job
+  # # See the following:
+  # #   https://github.com/actions/create-github-app-token/issues/66
+  # #   https://github.com/github/docs/pull/29386
+  # #   https://stackoverflow.com/questions/77133185/share-generated-github-token-within-different-jobs-on-github-actions
+  # #   https://github.com/actions/runner/issues/1498
+  # #   https://github.com/orgs/community/discussions/13082
+  # #   https://github.com/orgs/community/discussions/29880
+  # #   https://github.com/orgs/community/discussions/66044
+  # #   https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+  # #   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
+  # #   https://stackoverflow.com/questions/73476075/how-to-not-mask-output-in-github-actions
+  # #   
+  # # Options, if this needs to be done (but does it?)
+  # #   https://nitratine.net/blog/post/how-to-pass-secrets-between-runners-in-github-actions/
+  # #   
+  # get-token:
+  #   #name: Get the app token
+  #   runs-on: ubuntu-latest
+  #   if: |
+  #     contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+  #     startsWith(github.event.pull_request.head.ref, 'autorelease')
+  #   outputs:
+  #     #token: ${{ steps.app-token.outputs.token }}
+  #     token: ${{ steps.set-secret.outputs.token }}
+  #   steps:
+  #     # https://github.com/actions/create-github-app-token
+  #     - name: Creating a GitHub App Token from actions/create-github-app-token
+  #       uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
+  #       id: app-token
+  #       with:
+  #         # required
+  #         app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+  #         private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+  #         # do not revoke the token when the 'get-token' job is complete
+  #         skip-token-revoke: true
+  #         # https://github.com/actions/create-github-app-token?tab=readme-ov-file#skip-token-revoke
+  #
+  #     - name: Mask and output the app-token as a secret
+  #       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
+  #       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+  #       id: set-secret
+  #       run: |
+  #         #app-token=${{ steps.app-token.outputs.token }}
+  #         #echo "::add-mask::$app-token"
+  #         echo "::add-mask::${{ steps.app-token.outputs.token }}
+  #         echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+  #
+  #     # # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
+  #     # - uses: some/secret-store@v1
+  #     #   with:
+  #     #     credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
+  #     #     instance: ${{ secrets.SECRET_STORE_INSTANCE }}
+  #     # - name: generate secret
+  #     #   id: generate-secret
+  #     #   shell: bash
+  #     #   run: |
+  #     #     GENERATED_SECRET=$((RANDOM))
+  #     #     echo "::add-mask::$GENERATED_SECRET"
+  #     #     SECRET_HANDLE=$(secret-store store-secret "$GENERATED_SECRET")
+  #     #     echo "handle=$SECRET_HANDLE" >> "$GITHUB_OUTPUT"
+  #
+  #     - name: Verbose | Output the runner environment and GitHub context
+  #       id: verbose-print-env-and-context
+  #       if: contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
+  #       run: | 
+  #         ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
+  #         ## the double number signs below are for line spacing and readability only
+  #         ##
+  #         echo "starting the 'verbose-print-env-and-context' step. "
+  #         echo ""
+  #         echo "::group::Runner Environment"
+  #         echo "## Runner Environment"
+  #         env | sort
+  #         echo "\n"
+  #         echo "::endgroup::"
+  #         echo ""
+  #         echo "::group::GitHub context"
+  #         echo "## GitHub context"
+  #         echo "$GITHUB_CONTEXT"
+  #         echo "\n"
+  #         echo "::endgroup::"
+  #         echo ""
+  #         ##
+  #         echo "printing other github info:"
+  #         echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+  #         echo ""
+  #         echo ""
+  #         echo "::group::GitHub labels"
+  #         echo "## GitHub labels"
+  #         echo "$GITHUB_LABELS"
+  #         echo "\n"
+  #         echo "::endgroup::"
+  #         echo ""
+  #         echo "completing the 'verbose-print-env-and-context' step. "
+  #       env:
+  #         GITHUB_CONTEXT: ${{ toJson(github) }}
+  #         GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
