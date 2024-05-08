@@ -190,7 +190,7 @@ jobs:
         uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
         with:
           json-file: 'my-test-custom-variables.json'
-          vars-field: 'my_custom_version'
+          vars-field: 'other_var_02'
           #gh-token: ${{ steps.app-token.outputs.token }}
           vars-new-value: ${{ steps.get-next-semver.outputs.next-version }}
           action-verbose: true
