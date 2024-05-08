@@ -24,10 +24,10 @@ on:
         default: 'not-set'
         required: true
         type: string
-      preid:
-        description: 'Pre-release identifier (only for pre-release builds)'
-        default: rc
-        required: false
+      # preid:
+      #   description: 'Pre-release identifier (only for pre-release builds)'
+      #   default: rc
+      #   required: false
 
 permissions:
   #contents: read
@@ -183,8 +183,31 @@ jobs:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
+      - name: update-json-field | Run rwaight/actions test/update-json-field
+        id: update-json-field
+        continue-on-error: true
+        #uses: rwaight/actions/test/update-json-field@main
+        uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
+        with:
+          json-file: 'my-test-custom-variables.json'
+          vars-field: 'my_custom_version'
+          #gh-token: ${{ steps.app-token.outputs.token }}
+          vars-new-value: ${{ steps.get-next-semver.outputs.next-version }}
+          action-verbose: true
+
+      - name: update-json-field | Print outputs
+        if: ${{ steps.update-json-field.outputs.new-value }}
+        run: |
+          echo "The output from the 'update-json-field' step was: "
+          echo "previous value: ${{ env.previous-value }} "
+          echo "new value     : ${{ env.new-value }} "
+        env:
+          previous-value: ${{ steps.update-json-field.outputs.previous-value }}
+          new-value: ${{ steps.update-json-field.outputs.new-value }}
+
       - name: bump-json-version | Run rwaight/actions test/bump-json-version
         id: bump-json-version
+        continue-on-error: true
         #uses: rwaight/actions/test/bump-json-version@main
         uses: rwaight/actions/test/bump-json-version@dev-rw-202405-v16
         with:
