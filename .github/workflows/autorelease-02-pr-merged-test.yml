@@ -1,0 +1,121 @@
+# from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/pr-merged.yml
+# this workflow creates a draft release, it is ALMOST a duplicate of the 'release-drafter' job in the 'release-manager' workflow
+name: 'test PR merged'
+run-name: 'test [autorelease] PR merged'
+
+on:
+  pull_request:
+    branches:
+      - main
+    #types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+
+  get-token:
+    #name: Get the app token
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]+$)
+    outputs:
+      token: ${{ steps.app-token.outputs.token }}
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+  branch-info:
+    # get information from the autorelease branch
+    #name: get info from the autorelease branch
+    runs-on: ubuntu-latest
+    needs: [get-token]
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]+$)
+    outputs:
+      release-version: ${{ steps.get-release-version.outputs.release-version }}
+      release-type: ${{ steps.get-release-type.outputs.release-type }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          #ref: ${{ github.head_ref }}
+          #token: ${{ steps.app-token.outputs.token }}
+          token: ${{ needs.get-token.outputs.token }}
+
+      - name: Get release version from the autorelease branch
+        id: get-release-version
+        run: |
+          # Head branch should be named autorelease/<version>
+          if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
+            echo "::error::Invalid branch '${{ github.event.pull_request.head.ref }}'"
+            exit 1
+          fi
+          VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | awk -F/ '{print $2}')
+          echo "VERSION=$VERSION"
+  
+          RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+          if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+          else
+            echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+          fi
+  
+          if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+  
+          if [[ -f $GITHUB_OUTPUT ]]; then
+            echo "release-version=$VERSION" >> $GITHUB_OUTPUT
+            echo "release-version=$VERSION" >> $GITHUB_ENV
+            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          else
+            echo "::set-output name=release-version::$VERSION"
+            echo "::set-output name=is-prerelease::$pre"
+          fi
+
+      - name: Get release type from the '${{ env.vars-file }}' file
+        id: get-release-type
+        run: |
+          ## Get release type from the '${{ env.vars-file }}' file 
+          echo "Starting the 'get-release-type' step... "
+          echo "Getting the value of the '${{ env.type-field }}' field "
+          get_release_type=$(jq --raw-output .${{ env.type-field }} ${{ env.vars-file }})
+          echo "  ${{ env.type-field }}:   ${get_release_type} "
+          echo ""
+          echo "Setting 'release-type' to ${get_release_type} "
+          echo "release-type=${get_release_type}" >> $GITHUB_OUTPUT
+          echo "release-type=${get_release_type}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'get-release-type' step... "
+        env:
+          vars-file: my-test-custom-variables.json
+          type-field: my_release_type
+          version-field: my_custom_version
+
+  autorelease-info:
+    # call the autorelease get info workflow
+    #name: get autorelease info
+    uses: ./.github/workflows/reuse_autorelease-get-info.yml
+    needs: [get-token, branch-info]
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+      startsWith(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]+$)
+    secrets:
+       #token: ${{ secrets.access-token }}
+       token: ${{ needs.get-token.outputs.token }}
+    #secrets: inherit
+    with:
+      release-type: ${{ needs.branch-info.outputs.release-type }}
+      #preid: rc
+      verbose: true
+      #release-version: ${{ needs.branch-info.outputs.release-version }}
