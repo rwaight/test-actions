@@ -362,7 +362,7 @@ jobs:
           ## Update the '${{ env.vars-file }}' file 
           echo "Starting the 'update-vars-file' step... "
           echo "  updating the 'my_release_type' field with the user provided release-type"
-          tmp1=$(mktemp1)
+          tmp1=$(mktemp)
           jq '.my_release_type = "${{ env.release-type }}"' ${{ env.vars-file }} > "$tmp1" && mv "$tmp1" ${{ env.vars-file }}
           echo "    the jq command has finished "
           echo "  checking the value of the 'my_release_type' field "
@@ -371,7 +371,7 @@ jobs:
           echo ""
           #
           echo "updating the 'my_reviewed_image' field with the user provided reviewed-image"
-          tmp2=$(mktemp2)
+          tmp2=$(mktemp)
           jq '.my_reviewed_image = "${{ env.reviewed-image }}"' ${{ env.vars-file }} > "$tmp2" && mv "$tmp2" ${{ env.vars-file }}
           echo "    the jq command has finished "
           echo "  checking the value of the 'my_reviewed_image' field "
