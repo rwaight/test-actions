@@ -14,13 +14,67 @@ permissions:
 
 jobs:
 
+  always-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verbose | Output the runner environment and GitHub context
+        id: verbose-print-env-and-context
+        run: | 
+          ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-env-and-context' step. "
+          echo ""
+          echo "::group::Runner Environment"
+          echo "## Runner Environment"
+          env | sort
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub context"
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          ##
+          echo "printing other github info:"
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          echo ""
+          echo ""
+          echo "::group::GitHub labels"
+          echo "## GitHub labels"
+          echo "$GITHUB_LABELS"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "completing the 'verbose-print-env-and-context' step. "
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
+
+  not-applicable:
+    # do nothing else because this is not an autorelease branch
+    #name: do nothing else because this is not an autorelease branch
+    runs-on: ubuntu-latest
+    if: |
+      !(contains(github.event.pull_request.labels.*.name, 'actions:autorelease')) && 
+      !(startsWith(github.event.pull_request.head.ref, 'autorelease'))
+    steps:
+
+      - name: Nothing to do, this is not an autorelease branch
+        id: print-something
+        run: |
+          # Nothing to do, this is not an autorelease branch
+          echo "nothing else will run, this is not an autorelease branch"
+
   get-token:
     #name: Get the app token
     runs-on: ubuntu-latest
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+      startsWith(github.event.pull_request.head.ref, 'autorelease')
     outputs:
       token: ${{ steps.app-token.outputs.token }}
     steps:
@@ -33,15 +87,57 @@ jobs:
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
+      - name: Verbose | Output the runner environment and GitHub context
+        id: verbose-print-env-and-context
+        if: contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
+        run: | 
+          ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-env-and-context' step. "
+          echo ""
+          echo "::group::Runner Environment"
+          echo "## Runner Environment"
+          env | sort
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub context"
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          ##
+          echo "printing other github info:"
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          echo ""
+          echo ""
+          echo "::group::GitHub labels"
+          echo "## GitHub labels"
+          echo "$GITHUB_LABELS"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "completing the 'verbose-print-env-and-context' step. "
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
+
   branch-info:
     # get information from the autorelease branch
     #name: get info from the autorelease branch
     runs-on: ubuntu-latest
     needs: [get-token]
+    # if: |
+    #   (github.event.pull_request.merged == true) && 
+    #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #   ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+      contains(github.event.pull_request.head.ref, 'v*.*.*')
     outputs:
       release-version: ${{ steps.get-release-version.outputs.release-version }}
       release-type: ${{ steps.get-release-type.outputs.release-type }}
@@ -109,6 +205,10 @@ jobs:
     #name: get autorelease info
     uses: ./.github/workflows/reuse_autorelease-get-info.yml
     needs: [get-token, branch-info]
+    # if: |
+    #   (github.event.pull_request.merged == true) && 
+    #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #   ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
