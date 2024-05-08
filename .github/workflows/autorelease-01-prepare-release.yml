@@ -186,8 +186,8 @@ jobs:
       - name: update-json-field | Run rwaight/actions test/update-json-field
         id: update-json-field
         continue-on-error: true
-        #uses: rwaight/actions/test/update-json-field@main
-        uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
+        uses: rwaight/actions/test/update-json-field@main
+        #uses: rwaight/actions/test/update-json-field@dev-rw-202405-v16
         with:
           json-file: 'my-test-custom-variables.json'
           vars-field: 'other_var_02'
