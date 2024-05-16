@@ -68,94 +68,12 @@ jobs:
           # Nothing to do, this is not an autorelease branch
           echo "nothing else will run, this is not an autorelease branch"
 
-  get-token:
-    #name: Get the app token
-    runs-on: ubuntu-latest
-    if: |
-      (github.event.pull_request.merged == true) && 
-      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      startsWith(github.event.pull_request.head.ref, 'autorelease')
-    outputs:
-      #token: ${{ steps.app-token.outputs.token }}
-      token: ${{ steps.set-secret.outputs.token }}
-    steps:
-      # https://github.com/actions/create-github-app-token
-      - name: Creating a GitHub App Token from actions/create-github-app-token
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
-        id: app-token
-        with:
-          # required
-          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
-          # do not revoke the token when the 'get-token' job is complete
-          skip-token-revoke: true
-          # https://github.com/actions/create-github-app-token?tab=readme-ov-file#skip-token-revoke
-
-      - name: Mask and output the app-token as a secret
-        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-a-generated-output-within-a-single-job
-        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
-        id: set-secret
-        run: |
-          app-token=${{ steps.app-token.outputs.token }}
-          echo "::add-mask::$app-token"
-          echo "token=$app-token" >> "$GITHUB_OUTPUT"
-
-      # # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-masking-and-passing-a-secret-between-jobs-or-workflows
-      # - uses: some/secret-store@v1
-      #   with:
-      #     credentials: ${{ secrets.SECRET_STORE_CREDENTIALS }}
-      #     instance: ${{ secrets.SECRET_STORE_INSTANCE }}
-      # - name: generate secret
-      #   id: generate-secret
-      #   shell: bash
-      #   run: |
-      #     GENERATED_SECRET=$((RANDOM))
-      #     echo "::add-mask::$GENERATED_SECRET"
-      #     SECRET_HANDLE=$(secret-store store-secret "$GENERATED_SECRET")
-      #     echo "handle=$SECRET_HANDLE" >> "$GITHUB_OUTPUT"
-
-      - name: Verbose | Output the runner environment and GitHub context
-        id: verbose-print-env-and-context
-        if: contains(github.event.pull_request.head.ref, 'autorelease\/[A-Za-z0-9.+-]')
-        run: | 
-          ## Print the runner environment and GitHub context if inputs.verbose-action=='true'
-          ## the double number signs below are for line spacing and readability only
-          ##
-          echo "starting the 'verbose-print-env-and-context' step. "
-          echo ""
-          echo "::group::Runner Environment"
-          echo "## Runner Environment"
-          env | sort
-          echo "\n"
-          echo "::endgroup::"
-          echo ""
-          echo "::group::GitHub context"
-          echo "## GitHub context"
-          echo "$GITHUB_CONTEXT"
-          echo "\n"
-          echo "::endgroup::"
-          echo ""
-          ##
-          echo "printing other github info:"
-          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
-          echo ""
-          echo ""
-          echo "::group::GitHub labels"
-          echo "## GitHub labels"
-          echo "$GITHUB_LABELS"
-          echo "\n"
-          echo "::endgroup::"
-          echo ""
-          echo "completing the 'verbose-print-env-and-context' step. "
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-          GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
 
   branch-info:
     # get information from the autorelease branch
     #name: get info from the autorelease branch
     runs-on: ubuntu-latest
-    needs: [get-token]
+    #needs: [get-token]
     # if: |
     #   (github.event.pull_request.merged == true) && 
     #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
@@ -169,12 +87,22 @@ jobs:
       release-version: ${{ steps.get-release-version.outputs.release-version }}
       release-type: ${{ steps.get-release-type.outputs.release-type }}
     steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         with:
           #ref: ${{ github.head_ref }}
-          #token: ${{ steps.app-token.outputs.token }}
-          token: ${{ needs.get-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
+          #token: ${{ needs.get-token.outputs.token }}
 
       - name: Get release version from the autorelease branch
         id: get-release-version
@@ -239,7 +167,8 @@ jobs:
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+      contains(github.event.pull_request.head.ref, 'v*.*.*')
     secrets:
        #access-token: ${{ secrets.access-token }}
        access-token: ${{ needs.get-token.outputs.token }}
@@ -256,10 +185,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-token]
     #if: (github.event.pull_request.merged == true)
+    # if: |
+    #   (github.event.pull_request.merged == true) && 
+    #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #   ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+      contains(github.event.pull_request.head.ref, 'v*.*.*')
     outputs:
       pr-sha: ${{ steps.pr-commit.outputs.sha }}
       main-sha: ${{ steps.main-commit.outputs.sha }}
@@ -327,10 +261,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-token, branch-info, autorelease-info, merge-info]
     #needs: [get-token, branch-info, autorelease-info]
+    # if: |
+    #   (github.event.pull_request.merged == true) && 
+    #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #   ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
     if: |
       (github.event.pull_request.merged == true) && 
       contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
+      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+      contains(github.event.pull_request.head.ref, 'v*.*.*')
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4

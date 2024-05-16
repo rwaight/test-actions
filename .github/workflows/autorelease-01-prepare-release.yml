@@ -68,6 +68,7 @@ jobs:
       ##
     env:
       VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+      PRE_ID: ${{ inputs.preid || 'rc' }}
     steps:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
@@ -116,7 +117,8 @@ jobs:
         uses: rwaight/actions/test/get-next-semver@main
         with:
           gh-token: ${{ steps.app-token.outputs.token }}
-          pre-release-id: ${{ inputs.preid }}
+          #pre-release-id: ${{ inputs.preid }}
+          #pre-release-id: ${{ env.PRE_ID }} #just use the default 'rc' value
           release-type: ${{ inputs.release-type }}
           action-verbose: true
 
