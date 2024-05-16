@@ -111,7 +111,8 @@ jobs:
         #name: Autorelease | Check 'autorelease' branch
         id: set-label-scope-semver
         #if: contains('refs/heads/autorelease', github.ref)
-        if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        # this does not work #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         # if: | 
         #   contains('
         #     refs/heads/autorelease
@@ -144,7 +145,8 @@ jobs:
 
       - name: Set the label scope to 'type'
         id: set-label-scope-type
-        if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
