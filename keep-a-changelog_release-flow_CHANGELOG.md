@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.6-0] - 2024-05-16
+
 ## [0.2.5] - 2024-05-08
 
 ## [0.2.4] - 2024-05-03
@@ -57,7 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial draft of the GitHub test actions monorepo
 
-[Unreleased]: https://github.com/rwaight/test-actions/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/rwaight/test-actions/compare/v0.2.6-0...HEAD
+
+[0.2.6-0]: https://github.com/rwaight/test-actions/compare/v0.2.5...v0.2.6-0
 
 [0.2.5]: https://github.com/rwaight/test-actions/compare/v0.2.4...v0.2.5
 
