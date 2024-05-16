@@ -296,7 +296,7 @@ jobs:
         id: check-semver-labels
         #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
         # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
-        if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         with:
           gh-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           allow-failure: true
