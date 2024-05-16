@@ -78,19 +78,23 @@ jobs:
     #   (github.event.pull_request.merged == true) && 
     #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
     #   ${{ github.event.pull_request.head.ref =~ ^autorelease\/[A-Za-z0-9.+-]+$ }}
-    if: |
-      (github.event.pull_request.merged == true) && 
-      contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
-      startsWith(github.event.pull_request.head.ref, 'autorelease') && 
-      contains(github.event.pull_request.head.ref, 'v*.*.*')
+    # the conditional below is not working
+    # if: |
+    #   (github.event.pull_request.merged == true) && 
+    #   contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #   startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #   contains(github.event.pull_request.head.ref, 'v*.*.*')
+    # the conditional above is not working
+    if: github.event.pull_request.merged == true  # use this for testing
     outputs:
       release-version: ${{ steps.get-release-version.outputs.release-version }}
       release-type: ${{ steps.get-release-type.outputs.release-type }}
     steps:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
         id: app-token
         with:
           # required
@@ -98,7 +102,9 @@ jobs:
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
       - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
         with:
           #ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
@@ -106,15 +112,17 @@ jobs:
 
       - name: Get release version from the autorelease branch
         id: get-release-version
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         run: |
           # Head branch should be named autorelease/<version>
-          if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
-            echo "::error::Invalid branch '${{ github.event.pull_request.head.ref }}'"
-            exit 1
-          fi
+          ##old##if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
+          ##old##  echo "::error::Invalid branch '${{ github.event.pull_request.head.ref }}'"
+          ##old##  exit 1
+          ##if ! [[  ]]
+          ##fi
           VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | awk -F/ '{print $2}')
           echo "VERSION=$VERSION"
-  
+          ##
           RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
           if [[ $VERSION =~ $RE ]]; then
             MAJOR="${BASH_REMATCH[1]}"
@@ -124,9 +132,9 @@ jobs:
           else
             echo "::error::Version '$VERSION' is not in a valid format" && exit 1
           fi
-  
+          ##
           if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
-  
+          ##
           if [[ -f $GITHUB_OUTPUT ]]; then
             echo "release-version=$VERSION" >> $GITHUB_OUTPUT
             echo "release-version=$VERSION" >> $GITHUB_ENV
@@ -135,6 +143,90 @@ jobs:
             echo "::set-output name=release-version::$VERSION"
             echo "::set-output name=is-prerelease::$pre"
           fi
+
+      - name: autorelease | use bash to check the branch name
+        id: bash-check-branch-name
+        if: github.event.pull_request.merged == 'true'
+        run: |
+          echo "starting the 'bash-check-branch-name' step. "
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex "
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              ##echo "::warning file=test-pr-info,title=bash-check-branch-name::the head ref did not match the regex."
+          fi
+          ##
+          echo "completing the 'bash-check-branch-name' step. "
+
+      - name: Autorelease | parse the branch name
+        id: autorelease-parse-branch-name
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        run: |
+          echo "starting the 'autorelease-parse-branch-name' step. "
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex, but the branch name starts with 'autorelease'."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=pr-labeler,title=autorelease-parse-branch-name::the head ref did not match the regex, but the branch name starts with 'autorelease'."
+          fi
+          ##
+          echo "completing the 'autorelease-parse-branch-name' step. "
 
       - name: Get release type from the '${{ env.vars-file }}' file
         id: get-release-type
@@ -198,8 +290,21 @@ jobs:
       pr-sha: ${{ steps.pr-commit.outputs.sha }}
       main-sha: ${{ steps.main-commit.outputs.sha }}
     steps:
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
       - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
         with:
           #ref: ${{ github.head_ref }}
           #token: ${{ steps.app-token.outputs.token }}
