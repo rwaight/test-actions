@@ -1,20 +1,24 @@
 # Changelog
 
-## [0.2.4](https://github.com/rwaight/test-actions/tree/0.2.4) (2024-05-08)
+## [0.3.0-rc1](https://github.com/rwaight/test-actions/tree/0.3.0-rc1) (2024-05-16)
 
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0...0.2.4)
+[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.4...0.3.0-rc1)
 
 **Merged pull requests:**
 
-- test: updates for autorelease from autorelease/test 02 [\#66](https://github.com/rwaight/test-actions/pull/66) ([rwaight](https://github.com/rwaight))
-- test: update autorelease/test 01 [\#61](https://github.com/rwaight/test-actions/pull/61) ([rwaight](https://github.com/rwaight))
-- fix: options sent to bump-json-version [\#60](https://github.com/rwaight/test-actions/pull/60) ([rwaight](https://github.com/rwaight))
-- fix: check for label in prepare-release [\#59](https://github.com/rwaight/test-actions/pull/59) ([rwaight](https://github.com/rwaight))
-- update autorelease workflows [\#57](https://github.com/rwaight/test-actions/pull/57) ([rwaight](https://github.com/rwaight))
-
-## [v0](https://github.com/rwaight/test-actions/tree/v0) (2024-05-06)
-
-[Full Changelog](https://github.com/rwaight/test-actions/compare/v0.2.3...v0)
+- refactor: update pr-labeler for autorelease [\#95](https://github.com/rwaight/test-actions/pull/95) ([rwaight](https://github.com/rwaight))
+- refactor: pr-labeler conditionals [\#93](https://github.com/rwaight/test-actions/pull/93) ([rwaight](https://github.com/rwaight))
+- test: comment out bad conditionals [\#91](https://github.com/rwaight/test-actions/pull/91) ([rwaight](https://github.com/rwaight))
+- test: comment out bad conditionals [\#90](https://github.com/rwaight/test-actions/pull/90) ([rwaight](https://github.com/rwaight))
+- test: comment out bad conditionals [\#89](https://github.com/rwaight/test-actions/pull/89) ([rwaight](https://github.com/rwaight))
+- Test autorelease/test 07 [\#88](https://github.com/rwaight/test-actions/pull/88) ([rwaight](https://github.com/rwaight))
+- Revert "\[autorelease\] test release v0.2.5" [\#86](https://github.com/rwaight/test-actions/pull/86) ([rwaight](https://github.com/rwaight))
+- \[autorelease\] test release v0.2.5 [\#85](https://github.com/rwaight/test-actions/pull/85) ([rw-actions-bot[bot]](https://github.com/apps/rw-actions-bot))
+- generate the app-token within a job [\#84](https://github.com/rwaight/test-actions/pull/84) ([rwaight](https://github.com/rwaight))
+- mask the app-token output [\#82](https://github.com/rwaight/test-actions/pull/82) ([rwaight](https://github.com/rwaight))
+- refactor: update conditionals [\#80](https://github.com/rwaight/test-actions/pull/80) ([rwaight](https://github.com/rwaight))
+- feat: updates for autorelease from autorelease/test 03 [\#78](https://github.com/rwaight/test-actions/pull/78) ([rwaight](https://github.com/rwaight))
+- test: create pr merged test workflow [\#71](https://github.com/rwaight/test-actions/pull/71) ([rwaight](https://github.com/rwaight))
 
 
 
