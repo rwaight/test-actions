@@ -232,11 +232,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (single quotes) "
 
-      - name: label autorelease | contains github.event.pull_request.labels.*.name conditional (double quotes)
-        id: label-autorelease-contains-label-name-double-quotes
-        if: contains(github.event.pull_request.labels.*.name, "actions:autorelease")
-        run: |
-          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (double quotes) "
+      # - name: label autorelease | contains github.event.pull_request.labels.*.name conditional (double quotes)
+      #   id: label-autorelease-contains-label-name-double-quotes
+      #   # error: Unexpected symbol: '"actions:autorelease"'. Located at position 51 within expression: contains(github.event.pull_request.labels.*.name, "actions:autorelease") 
+      #   #if: contains(github.event.pull_request.labels.*.name, "actions:autorelease")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (double quotes) "
 
       - name: label group test | contains github.event.pull_request.labels.*.name conditional
         id: label-group-test-contains-label-name-single-quotes
@@ -244,11 +245,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (single quotes) "
 
-      - name: label group test | contains github.event.pull_request.labels.*.name conditional (double quotes)
-        id: label-group-test-contains-label-name-double-quotes
-        if: contains(github.event.pull_request.labels.*.name, "group:test")
-        run: |
-          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (double quotes) "
+      # - name: label group test | contains github.event.pull_request.labels.*.name conditional (double quotes)
+      #   id: label-group-test-contains-label-name-double-quotes
+      #   # error:  Unexpected symbol: '"group:test"'. Located at position 51 within expression: contains(github.event.pull_request.labels.*.name, "group:test")
+      #   #if: contains(github.event.pull_request.labels.*.name, "group:test")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (double quotes) "
 
 
   check-commit-sha:
