@@ -1,10 +1,10 @@
 name: 'create tag'
-run-name: 'Test: create tag `${{ inputs.tag-name }}` '
+run-name: 'Test: create `${{ inputs.RELEASE_TYPE }}` tag'
 
 on: 
   workflow_dispatch:
     inputs:
-      release-type:
+      RELEASE_TYPE:
         description: 'Release type'
         type: choice
         required: true
@@ -17,7 +17,7 @@ on:
           - prepatch
           - prerelease
           #- pretoprod
-        default: patch
+        default: prepatch
       create_tag:
         description: 'create the actual tag?'
         required: true
