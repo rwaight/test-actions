@@ -209,4 +209,14 @@ jobs:
           result-encoding: string
 
       - name: Get result from 'use-github-script' step
-        run: echo "${{ steps.use-github-script.outputs.result }}"
+        #run: echo "${{ steps.use-github-script.outputs.result }}"
+        #run: echo "${{ fromJSON(steps.use-github-script.outputs.result)['body'] }}"
+        continue-on-error: true
+        run: |
+          echo "attempt to output without any functions"
+          echo "${{ steps.use-github-script.outputs.result }}"
+          echo ""
+          echo "attempt to output using 'fromJSON' "
+          echo "${{ fromJSON(steps.use-github-script.outputs.result) }}"
+          echo ""
+
