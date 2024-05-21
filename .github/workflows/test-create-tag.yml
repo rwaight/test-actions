@@ -1,5 +1,5 @@
 name: 'create tag'
-run-name: 'Test: create tag `${{ inputs.tag-name }}` '
+run-name: 'Test: create `${{ inputs.release-type }}` tag'
 
 on: 
   workflow_dispatch:
@@ -17,7 +17,7 @@ on:
           - prepatch
           - prerelease
           #- pretoprod
-        default: patch
+        default: prepatch
       create_tag:
         description: 'create the actual tag?'
         required: true
