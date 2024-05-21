@@ -5,7 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       RELEASE_TYPE:
-        description: 'Release type, see [the get-next-semver readme](https://github.com/rwaight/actions/tree/main/test/get-next-semver#release-type) for more info'
+        # this does not render the link in markdown
+        #description: 'Release type, see [the get-next-semver readme](https://github.com/rwaight/actions/tree/main/test/get-next-semver#release-type) for more info'
+        description: 'Release type, only prerelease options for this test'
         type: choice
         required: true
         options:
