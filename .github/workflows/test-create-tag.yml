@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       RELEASE_TYPE:
-        description: 'Release type'
+        description: 'Release type, see [the get-next-semver readme](https://github.com/rwaight/actions/tree/main/test/get-next-semver#release-type) for more info'
         type: choice
         required: true
         options:
