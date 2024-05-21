@@ -1,0 +1,197 @@
+name: 'create tag'
+run-name: 'Test: create tag `${{ inputs.tag-name }}` '
+
+on: 
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release type'
+        type: choice
+        required: true
+        options:
+          #- major
+          #- minor
+          #- patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+          #- pretoprod
+        default: patch
+      create_tag:
+        description: 'create the actual tag?'
+        required: true
+        default: false
+        type: boolean
+      # preid:
+      #   description: 'Pre-release identifier (only for pre-release builds)'
+      #   default: rc
+      #   required: false
+
+permissions:
+  contents: write
+
+jobs:
+
+  test-create-tag:
+    #name: test-create-tag
+    runs-on: ubuntu-latest
+    if: (github.repository_owner == 'rwaight') && (github.event_name=='workflow_dispatch' && inputs.create_tag==true)
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
+    steps:
+
+      - name: Create an App Token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        #uses: actions/create-github-app-token@v1.10.0
+        id: app-token
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: |
+          (github.repository == 'rwaight/test-actions') &&
+          (github.actor!= 'dependabot[bot]') &&
+          (contains(github.head_ref, 'dependabot-') == false)
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      #   ## use this info to login to github??
+      #   ## specifically, the 'GH_TOKEN' env variable
+      # - name: Ensure the ${{ inputs.semver-fallback }} label exists
+      #   id: ensure-alternate-label-exists
+      #   shell: bash
+      #   run: |
+      #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+      #         echo "starting the 'ensure-alternate-label-exists' step. "
+      #         echo "  the value of 'semver-fallback' is '${{ env.semver-fallback }}'. "
+      #         echo ""
+      #         echo "  running 'gh label list' to check for the ${{ env.semver-fallback }} label "
+      #         gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name'
+      #         echo "  running 'gh label list' with the '--jq' option -- setting the output as gh_label_result "
+      #         gh_label_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
+      #         echo "    gh_label_result was set to '${gh_label_result}' . "
+      #         echo ""
+      #     fi
+      #     ##
+      #     LABEL=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
+      #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+      #         echo "  the value of LABEL is '${LABEL}'. "
+      #     fi
+      #     ##
+      #     if [[ -z "$LABEL" ]]; then
+      #       echo "  fallback label not found, attempting to create the '${{ env.semver-fallback }}' label"
+      #       gh label create "${{ env.semver-fallback }}" --description "Need to have the version determined" --color BAA938
+      #     else
+      #       echo "  step 'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
+      #     fi
+      #     ##
+      #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
+      #   env:
+      #     #GITHUB_TOKEN: ${{ inputs.gh-token }}
+      #     GH_TOKEN: ${{ inputs.gh-token }}
+      #     semver-fallback: ${{ inputs.semver-fallback }}
+
+      - name: repo-version-info | Run rwaight/actions git/repo-version-info
+        id: repo-version-info
+        #uses: rwaight/actions/git/repo-version-info@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/git/repo-version-info@main
+        with:
+          #gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+
+      - name: repo-version-info | Print outputs
+        id: print-repo-info
+        if: |
+          ${{ steps.repo-version-info.outputs.latest-tag }} || 
+          ${{ steps.repo-version-info.outputs.latest-release }}
+        run: |
+          ## Print repo version information
+          echo "Here is the info from the repo-version-info step: "
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          ##
+          echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
+      - name: get-next-semver | Run rwaight/actions test/get-next-semver
+        id: get-next-semver
+        #continue-on-error: true
+        #uses: rwaight/actions/test/get-next-semver@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/test/get-next-semver@main
+        with:
+          gh-token: ${{ steps.app-token.outputs.token }}
+          #pre-release-id: ${{ inputs.RELEASE_PRE_ID }} # default is 'rc'
+          release-type: ${{ inputs.RELEASE_TYPE }}
+          #verbose: ${{ inputs.VERBOSE }}
+          verbose: true
+
+      - name: get-next-semver | Print outputs
+        if: ${{ steps.get-next-semver.outputs.next-version }}
+        run: |
+          ## Report the output from the get-next-semver step
+          echo "The output from the 'get-next-semver' step was: "
+          echo "- current tag       : ${{ env.current-tag }} "
+          echo "- current version   : ${{ env.current-version }} "
+          echo "- next tag          : ${{ env.next-tag }} "
+          echo "- next version      : ${{ env.next-version }} "
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} "
+          ##
+          echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next tag          : ${{ env.next-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        env:
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+
+      # - name: Set up git config
+      #   id: set-up-git
+      #   # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      #   # user: 'my-bot-name <noreply@github.com>'
+      #   run: |
+      #     ## Run 'git --version' then 'git config'
+      #     git --version
+      #     ## Configure git to login as the ${{ inputs.GH_APP_BOT_NAME }}
+      #     git config user.name ${{ inputs.GH_APP_BOT_NAME }}
+      #     git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ inputs.GH_APP_BOT_NAME }}@users.noreply.github.com
+      #     echo "the 'set-up-git' step has completed. "
+
+      - name: 🏷️ Create/update tag
+        uses: actions/github-script@v7
+        if: ${{ steps.get-next-semver.outputs.next-tag }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.get-next-semver.outputs.next-tag }}',
+              sha: context.sha
+            }).catch(err => {
+              if (err.status !== 422) throw err;
+              github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/${{ steps.get-next-semver.outputs.next-tag }}',
+                sha: context.sha
+              });
+            })
