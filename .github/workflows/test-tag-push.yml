@@ -33,8 +33,10 @@ jobs:
 
       - name: Get release version
         id: get-release-version
+        #if: (github.ref_type == 'tag')
         run: |
-          VERSION="${{ github.event.release.tag_name }}"
+          echo "starting step 'get-release-version' "
+          VERSION="${{ github.event.release.tag_name || github.ref_name }}"
           ##
           RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
           if [[ $VERSION =~ $RE ]]; then
@@ -48,15 +50,13 @@ jobs:
           fi
           ##
           if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
-          if [[ -f $GITHUB_OUTPUT ]]; then
-            echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
-            echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
-            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
-          else
-            echo "::set-output name=major-ref::v$MAJOR"
-            echo "::set-output name=minor-ref::v$MINOR"
-            echo "::set-output name=is-prerelease::$pre"
-          fi
+          ##
+          echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+          echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          echo "completing the 'get-release-version' step "
 
       - name: Check output from get-release-version
         id: check-get-release-version
@@ -133,7 +133,8 @@ jobs:
       - name: Prerelease notice
         if: fromJSON(steps.get-release-version.outputs.is-prerelease)
         run: |
-          echo "::notice::Pre-release version detected, not moving ref  ${{ steps.get-release-version.outputs.major-ref }}"
+          echo "::notice::Pre-release version detected, not moving major ref ${{ steps.get-release-version.outputs.major-ref }}"
+          echo "::notice::Pre-release version detected, not moving minor ref ${{ steps.get-release-version.outputs.minor-ref }}"
 
       # - name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
       #   id: release-tag-updater
