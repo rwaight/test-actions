@@ -11,17 +11,17 @@
 # The following labels were part of GitHub repos by default
 -
   name: 'bug'
-  color: 'd73a4a'
+  color: 'D73A4A'
   description: 'Something is not working'
   aliases: []
 -
   name: 'documentation'
-  color: '0075ca'
+  color: '0075CA'
   description: 'Improvements or additions to documentation'
   aliases: []
 -
   name: 'duplicate'
-  color: 'cfd3d7'
+  color: 'CFD3D7'
   description: 'This issue or pull request already exists'
   aliases: []
 -
@@ -71,41 +71,18 @@
 # The actions: labels have not been formally defined
 -
   name: 'actions:autorelease'
-  color: 'baa938'
+  color: 'BAA938'
   description: 'This is an automatically-created PR to trigger a release'
+  aliases: []
+-
+  name: 'actions:autoupdate'
+  color: 'BAA938'
+  description: 'This is an automatically-created PR to update files in a repo'
   aliases: []
 -
   name: 'actions:dependabot'
   color: '50790C'
   description: 'Action changes or updates made by dependabot'
-  aliases: []
-#
-##### group: labels
-# The group: labels have not been formally defined
--
-  name: 'group:builders'
-  color: '50790C'
-  description: 'Actions in the ''builders'' group'
-  aliases: []
--
-  name: 'group:git'
-  color: '50790C'
-  description: 'Actions in the ''git'' group'
-  aliases: []
--
-  name: 'group:github'
-  color: '50790C'
-  description: 'Actions in the ''github'' group'
-  aliases: []
--
-  name: 'group:releases'
-  color: '50790C'
-  description: 'Actions in the ''releases'' group'
-  aliases: []
--
-  name: 'group:utilities'
-  color: '50790C'
-  description: 'Actions in the ''utilities'' group'
   aliases: []
 #
 ##### impacts: labels
@@ -116,6 +93,16 @@
   description: 'Impacting GitHub actions'
   aliases: []
 -
+  name: 'impacts:assets'
+  color: '5F9188'
+  description: 'Impacting the ''assets'' directory'
+  aliases: []
+-
+  name: 'impacts:docs'
+  color: '5F9188'
+  description: 'Impacting the ''docs'' directory'
+  aliases: []
+-
   name: 'impacts:examples'
   color: '5F9188'
   description: 'Impacting example actions and/or workflows'
@@ -123,7 +110,7 @@
 -
   name: 'impacts:repo'
   color: '5F9188'
-  description: 'Impacting the ''.gitHub'' directory'
+  description: 'Impacting the ''.git'' or ''.github'' directory'
   aliases: []
 -
   name: 'impacts:workflows'
@@ -158,6 +145,11 @@
   color: 'F9D0C4'
   description: 'Determined to have no priority; none at all.'
   aliases: []
+-
+  name: 'triage:priority-needed'
+  color: 'E17668'
+  description: 'Need to have the priority determined'
+  aliases: []
 #
 ##### triage: labels
 # The triage: labels have not been formally defined
@@ -165,11 +157,6 @@
   name: 'triage:needs-assigned'
   color: 'E17668'
   description: 'Needs to be assigned'
-  aliases: []
--
-  name: 'triage:priority-needed'
-  color: 'E17668'
-  description: 'Need to have the priority determined'
   aliases: []
 -
   name: 'triage:stale'
@@ -198,7 +185,7 @@
 -
   name: 'type:style'
   color: '3580BA'
-  description: 'Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)'
+  description: 'Changes that do not affect the meaning of the code (white-space, formatting, missing colons, etc)'
   aliases: []
 -
   name: 'type:refactor'
@@ -223,7 +210,7 @@
 -
   name: 'type:ci'
   color: '3580BA'
-  description: 'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)'
+  description: 'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, SauceLabs)'
   aliases: []
 -
   name: 'type:chore'
