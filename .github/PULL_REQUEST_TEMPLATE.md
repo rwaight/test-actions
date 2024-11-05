@@ -1,4 +1,4 @@
-# Test Actions Monorepo - Pull Request
+# test-actions - Pull Request
 <!--- Please remove all comments prior to opening the pull request with this template --->
 
 ## Items required before submitting the pull request
@@ -6,7 +6,7 @@
 2. The **why** is this PR happening? What is it fixing or improving?
     - Describe the big picture of your changes here to communicate to the maintainers why this pull request should be accepted.
 3. Proper **label** - Select the `type:` label that best describes the changes
-    - Use [one of the **commit types** from this list](https://github.com/rwaight/test-actions/blob/main/assets/commitlint.config.js).
+    - Use [one of the **commit types** from this list](https://github.com/rwaight/test-actions/blob/main/commitlint.config.js).
 
 ## Why are you opening this PR?
 <!--- What are the proposed changes? --->
