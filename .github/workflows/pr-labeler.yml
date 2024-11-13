@@ -71,6 +71,31 @@ jobs:
           echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
           exit 1
 
+      - name: Show GitHub runner context
+        id: show-runner-context
+        ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+        env:
+          FOOBAR: ${{ runner.debug == '1' && 'foo' || 'bar' }}
+          # https://github.com/actions/runner/issues/2204#issuecomment-1287947031
+          # https://github.com/orgs/community/discussions/27627#discussioncomment-3302259
+          GH_RUNNER_LOG: "${{ runner.debug == '1' && 'INFO' || 'ERROR' }}"
+          GH_VAR_RUNNER_DEBUG1: ${{ runner.debug }}
+          GH_VAR_RUNNER_DEBUG2: ${{ env.RUNNER_DEBUG }}
+          GH_VAR_RUNNER_OS1: ${{ runner.os }}
+          GH_VAR_RUNNER_OS2: ${{ env.RUNNER_OS }}
+          GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
+          GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
+        run: |
+          echo "FOOBAR is ${FOOBAR}"
+          echo "GH_RUNNER_LOG is ${GH_RUNNER_LOG}"
+          echo "GH_VAR_RUNNER_DEBUG1 is ${GH_VAR_RUNNER_DEBUG1}"
+          echo "GH_VAR_RUNNER_DEBUG2 is ${GH_VAR_RUNNER_DEBUG2}"
+          echo "GH_VAR_RUNNER_OS1 is ${GH_VAR_RUNNER_OS1}"
+          echo "GH_VAR_RUNNER_OS2 is ${GH_VAR_RUNNER_OS2}"
+          echo "GH_VAR_RUNNER_ARCH1 is ${GH_VAR_RUNNER_ARCH1}"
+          echo "GH_VAR_RUNNER_ARCH2 is ${GH_VAR_RUNNER_ARCH2}"
+        ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+
       # # Save this in case we want to exit the workflow if it is called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
       # - name: Exit workflow if called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
       #   id: check-actions-bot
@@ -388,9 +413,10 @@ jobs:
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: |
-          (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
-          ${{ steps.find-comment.outputs.comment-id }}
+        if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: |
+        #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
+        #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
           #template: assets/pr-labeler/comment-checks-failure.md
@@ -412,9 +438,10 @@ jobs:
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: |
-          (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
-          ${{ steps.find-comment.outputs.comment-id }}
+        if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: |
+        #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
+        #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
         with:
           body: ${{ steps.comment-template.outputs.result }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
