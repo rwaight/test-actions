@@ -413,7 +413,8 @@ jobs:
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
         #ran when success# #if: |
         #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
         #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
@@ -438,7 +439,8 @@ jobs:
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
         #ran when success# #if: |
         #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
         #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
