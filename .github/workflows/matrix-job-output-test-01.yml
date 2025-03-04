@@ -1,6 +1,7 @@
 # this workflow is an example from:  https://github.com/orgs/community/discussions/26639#discussioncomment-3949595
 # 'Workflow job with needs output from matrix?'
-name: Works
+name: matrix-job-output-test-01
+run-name: Does test-01 work?
 on:
   push:
     branches: ["**"]
