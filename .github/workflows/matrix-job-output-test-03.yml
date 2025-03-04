@@ -3,7 +3,7 @@
 # For anyone else that ended up here, the docs give this advice on matrix job outputs:
 # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs#using-job-outputs-in-a-matrix-job
 #
-name: matrix-job-output-test-03
+name: matrix-output-test-03
 run-name: Does test-03 work?
 on:
   push:
