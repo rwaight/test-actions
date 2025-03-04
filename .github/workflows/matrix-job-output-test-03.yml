@@ -1,0 +1,38 @@
+# this workflow is an example from:  https://github.com/orgs/community/discussions/17245#discussioncomment-11222880
+# 'Jobs need a way to reference all outputs of matrix jobs'
+# For anyone else that ended up here, the docs give this advice on matrix job outputs:
+# https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs#using-job-outputs-in-a-matrix-job
+#
+name: matrix-output-test-03
+run-name: Does test-03 work?
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  first:
+    runs-on: ubuntu-latest
+    outputs:
+      output_1: ${{ steps.gen_output.outputs.output_1 }}
+      output_2: ${{ steps.gen_output.outputs.output_2 }}
+      output_3: ${{ steps.gen_output.outputs.output_3 }}
+    strategy:
+      matrix:
+        version: [1, 2, 3]
+    steps:
+      - name: Generate output
+        id: gen_output
+        run: |
+          version="${{ matrix.version }}"
+          echo "output_${version}=${version}" >> "$GITHUB_OUTPUT"
+  second:
+    runs-on: ubuntu-latest
+    needs: [first]
+    steps:
+      # Will show
+      # {
+      #   "output_1": "1",
+      #   "output_2": "2",
+      #   "output_3": "3"
+      # }
+      - run: echo '${{ toJSON(needs.first.outputs) }}'
