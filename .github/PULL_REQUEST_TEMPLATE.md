@@ -1,4 +1,4 @@
-# test-actions - Pull Request
+# A test repo for GitHub Actions - Pull Request
 <!--- Please remove all comments prior to opening the pull request with this template --->
 
 ## Items required before submitting the pull request
