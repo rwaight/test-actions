@@ -1,0 +1,179 @@
+# This workflow runs the 'Export label config' and 'Sync labels' actions and includes user input
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/label-manager.yml'
+
+name: Label manager
+run-name: Run ${{ github.event.action || 'label manager' }} from ${{ github.event_name }}
+
+on: 
+  # When any of the 'assets/labels/my-labels-*.yml' files are updated
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/labels/my-labels-*.yml'
+  # When called by a 'repository_dispatch' event
+  repository_dispatch:
+    types: [export-labels,sync-labels]
+  # When called manually by a 'workflow_dispatch' event
+  workflow_dispatch:
+    inputs:
+      export_labels:
+        description: 'Export labels from repo'
+        required: true
+        default: false
+        type: boolean
+      sync_labels:
+        description: 'Sync labels from config files'
+        required: true
+        default: false
+        type: boolean
+      # verbose_output:
+      #   description: 'Verbose output'
+      #   required: true
+      #   default: false
+      #   type: boolean
+  # On a schedule: every six months, at 10:00 on the first of the month
+  schedule:
+    - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
+
+env:
+  #VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#creating-configuration-variables-for-a-repository
+  # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#using-the-vars-context-to-access-configuration-variable-values
+  GH_LOCAL_PRIMARY:   ${{ vars.GH_LOCAL_PRIMARY }}          # the GitHub account to use first, either 'user' or 'bot'
+  GH_LOCAL_BOT_NAME:  ${{ vars.GH_LOCAL_BOT_NAME }}         # the bot (GitHub app) name without the '[bot]' suffix
+  GH_LOCAL_BOT_UID:   ${{ vars.GH_LOCAL_BOT_UID }}          # the bot (GitHub app) UID
+  GH_LOCAL_USER_NAME: ${{ vars.GH_LOCAL_USER_NAME }}        # the GitHub machine account user name
+  GH_LOCAL_USER_UID:  ${{ vars.GH_LOCAL_USER_UID }}         # the GitHub machine account user ID
+  # the owner of the repo, used in conditionals below
+  GH_OWNER: rwaight
+
+jobs:
+  export-and-sync-labels:
+    name: Export and sync repo labels
+    runs-on: ubuntu-latest
+    #env:
+    #  MY_WORKFLOW_DEBUG: ${{ inputs.verbose_output || 'false' }}
+    permissions:
+      contents: write
+      issues: write
+    steps:
+
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: ${{ github.repository_owner != env.GH_OWNER }}
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now fail and exit. "
+          echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
+          exit 1
+
+      # Create a GitHub App Token from actions/create-github-app-token
+      # https://github.com/actions/create-github-app-token
+      - name: Bot | Create an App Token for this job
+        id: app-token
+        if: | 
+          env.GH_LOCAL_PRIMARY == 'bot' && (
+          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
+          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) )
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
+
+      - name: Bot | Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Bot | Configure Git Credentials if using the app token
+        id: configure-git
+        if: ${{ steps.app-token.outputs.token }}
+        run: |
+          ## Configure git to login as the '${{ env.GH_LOCAL_BOT_NAME }}' Bot.
+          ## Ensure the bot is installed at: https://github.com/settings/installations
+          git config user.name ${{ env.GH_LOCAL_BOT_NAME }}[bot]
+          git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ env.GH_LOCAL_BOT_NAME }}[bot]@users.noreply.github.com
+          echo "the 'configure-git' step has completed. "
+
+      - name: Configure the GitHub CLI
+        id: config-cli
+        if: env.GH_LOCAL_PRIMARY=='user'
+        uses: rwaight/actions/test/config-gh-cli@main
+        with:
+          account-type: user
+          gh-token: ${{ secrets.BOT_USER_ACTIONS_TOKEN }}
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
+      - name: Export label config using rwaight/actions/github/export-label-config
+        id: export-label-config
+        continue-on-error: true
+        ## configure 'continue-on-error: true' until the 'export-label-config' action is fixed
+        if: |
+          (github.event_name=='schedule') || 
+          (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
+          (github.event_name=='repository_dispatch' && github.event.action=='export-labels')
+        ## disable (github.event_name=='push' && github.ref_name=='main') until the 'export-label-config' action is fixed
+        ##  (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
+        ##  (github.event_name=='push' && github.ref_name=='main')
+        uses: rwaight/actions/github/export-label-config@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        #uses: rwaight/actions/github/export-label-config@main
+        with:
+          # This is needed if you're dealing with private repos.
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          # Set 'raw-result' to `true` if you want to get the raw API reponse. Defaults to `false`.
+          raw-result: false
+          # By default every label entry will have an `aliases` property set to an empty array.
+          # It's for EndBug/label-sync, if you don't want it you can set this to `false`
+          add-aliases: true
+
+      - name: Sync labels using rwaight/actions/github/label-sync
+        id: run-label-sync
+        if: | 
+          (github.event_name=='schedule') ||
+          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
+          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
+          (github.event_name=='push' && github.ref_name=='main')
+        uses: rwaight/actions/github/label-sync@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        #uses: rwaight/actions/github/label-sync@main
+        with:
+          config-file: |
+            assets/labels/my-labels-core.yml
+            assets/labels/my-labels-actions.yml
+            assets/labels/my-labels-versioning.yml
+          ## use the repo's local labels in the 'assets/' directory
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
+          ## #
+          ## # The 'request-token' parameter is needed so the remote config-file values can be accessed
+          ## request-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          # If you want to delete any additional label, set this to true
+          delete-other-labels: true
+          # If you want the action just to show you the preview of the changes, without actually editing the labels, set this to true
+          dry-run: false
+          # You can change the token used to change the labels, this is the default one
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Run workflow debug
+        id: run-workflow-debug
+        if: env.MY_WORKFLOW_DEBUG=='true'
+        run: |
+          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo ""
+          echo "The GitHub event_name is: ${{ github.event_name }}"
+          echo "The GitHub ref is: ${{ github.ref }}"
+          echo "The GitHub ref_name is: ${{ github.ref_name }}"
+          echo ""
+          echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
+          echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
+          echo "The 'run-workflow-debug' step is now complete. "
+        continue-on-error: true
