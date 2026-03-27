@@ -9,6 +9,20 @@ This repo currently **does not include** [actions](https://docs.github.com/actio
 This repo contains [GitHub Actions](https://github.com/marketplace?type=actions) that are **not** [verified Actions](https://docs.github.com/actions/automating-your-workflow-with-github-actions/using-github-marketplace-actions).  Actions that **do not** have the `Verified creator` badge should be copied to this repo and run from this repo.
 - ***Note***: Any actions that run in a Docker container **must** be run by the dfeault Docker user, `root`, per [the Dockerfile support for GitHub Actions **USER** section](https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#user).
 
+## Getting Started
+
+To use an action from this repository in your workflow, reference the local path to the action's directory:
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run local action
+        uses: ./.github/actions/YOUR-ACTION-NAME
+```
+
 ##### only a test
 
 this is a test
