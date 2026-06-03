@@ -1,32 +1,16 @@
 {
-  "source_sha": "dd607fc",
-  "source_run_id": "26900400608",
-  "generated_at": "2026-06-03T17:06:09Z",
-  "file_count": 6,
+  "source_sha": "d0c9641",
+  "source_run_id": "26907626322",
+  "generated_at": "2026-06-03T19:23:21Z",
+  "file_count": 2,
   "files": [
     {
-      "path": "assets/labels/my-labels-actions.yml",
-      "sha256": "f3214519b17ee3017b5979aae27008fb8f91741ef3597d0a2c87513f23a3c250"
+      "path": ".github/workflows/validate-infra-pr.yml",
+      "sha256": "59b153cd20e2df5698eb44a00be76cf31b691e2186bda596a48336d5316c8de9"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "c2046e3daaa015d9af57dd4c9a3f82fe277e749288285505b2522141eb170d4d"
-    },
-    {
-      "path": "assets/pr-labeler/README.md",
-      "sha256": "e6fbcbe9000bc9009f5ae4a1c1abb6bece89e96fc9811819f467cb37e4a45d5b"
-    },
-    {
-      "path": "assets/pr-labeler/comment-checks-failure.md",
-      "sha256": "155a4774c17a47e9fbaff0ac655f7019dd18d8991e225449bd7d7cc9bdb307f0"
-    },
-    {
-      "path": "assets/pr-labeler/comment-checks-success.md",
-      "sha256": "2b00d5725717ea9919838beae9982f2a0e4d5994afdb248040d3457fee1a3eea"
-    },
-    {
-      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
-      "sha256": "39bd64a36b4e3ecf89679666800fb628fedf1d6d7f1cedba8c998872252e2d1e"
+      "sha256": "6a92751aa1f18cbd80e957b62528c74b5736192361eccd76c61a3605cd0a5b3d"
     }
   ]
 }
