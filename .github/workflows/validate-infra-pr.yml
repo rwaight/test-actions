@@ -14,14 +14,19 @@ run-name: "Validate infra-updater PR: ${{ github.head_ref }}"
 on:
   pull_request:
     branches: [main]
+    # 'closed' is added so the cleanup job can delete the branch after merge.
+    # Validate and auto-merge jobs guard against running on closed events via their if: conditions.
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
 
   validate-infra-pr:
     name: Validate manifest and checksums
     runs-on: ubuntu-latest
-    # Only run for PRs opened by the infra-updater (branch name convention).
-    if: startsWith(github.head_ref, 'ci/infra-update-')
+    # Only run for open/updated PRs from the infra-updater (not on PR close).
+    if: |
+      github.event.action != 'closed' &&
+      startsWith(github.head_ref, 'ci/infra-update-')
     permissions:
       contents: read
       pull-requests: write
@@ -98,11 +103,13 @@ jobs:
           diff_files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
 
           for diff_path in diff_files:
-              # Normalize: strip any leading './'
-              diff_path = diff_path.lstrip("./").lstrip("/")
+              # Normalize: strip only a leading './' prefix (two-char sequence).
+              # Do NOT use lstrip("./") — that strips characters from a set and would
+              # incorrectly convert '.github/...' → 'github/...' making comparisons fail.
+              if diff_path.startswith("./"):
+                  diff_path = diff_path[2:]
               # Manifest file excludes itself — skip it here too.
-              # Normalize the manifest path the same way for comparison.
-              if diff_path == MANIFEST.lstrip("./").lstrip("/"):
+              if diff_path == MANIFEST:
                   continue
               if diff_path not in manifest_map:
                   errors.append(f"NOT IN MANIFEST  {diff_path}")
@@ -133,6 +140,7 @@ jobs:
     needs: [validate-infra-pr]
     runs-on: ubuntu-latest
     if: |
+      github.event.action != 'closed' &&
       needs.validate-infra-pr.result == 'success' &&
       startsWith(github.head_ref, 'ci/infra-update-') &&
       vars.INFRA_AUTO_MERGE == 'true'
@@ -150,5 +158,32 @@ jobs:
           gh pr merge "${{ github.event.pull_request.number }}" \
             --squash --delete-branch --auto \
             --subject "ci: infra files update (auto-merge)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Cleanup (always) ──────────────────────────────────────────────────────────
+  # Deletes the ci/infra-update-* branch after the PR is merged, whether the
+  # merge was performed manually by a reviewer or via the auto-merge job above.
+  # This prevents stale remote tracking refs from causing --force-with-lease
+  # failures on the next infra-updater run targeting the same repo.
+
+  cleanup:
+    name: Delete infra-updater branch after merge
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.head_ref, 'ci/infra-update-')
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Delete branch ${{ github.head_ref }}
+        run: |
+          gh api \
+            --method DELETE \
+            "repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }}" \
+            || echo "Branch already deleted (auto-merge may have removed it)"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
