@@ -126,6 +126,20 @@ jobs:
               print(f"✓ Manifest validation passed: {len(manifest_entries)} files verified")
           PYEOF
 
+      - name: Post validation result comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          if [[ "${{ steps.validate.outcome }}" == "success" ]]; then
+            body="✅ Manifest validated — ${run_link} \`${timestamp}\`"
+          else
+            body="❌ Manifest validation failed — ${run_link} \`${timestamp}\`"
+          fi
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+
   # ── Auto-merge (opt-in per repo) ──────────────────────────────────────────────
   # Squash-merges the PR automatically after validation passes.
   #
@@ -151,6 +165,7 @@ jobs:
     steps:
 
       - name: Auto-merge downstream infra-updater PR
+        id: merge
         # '--auto' waits for all required branch-protection checks before merging.
         # '--squash' keeps the default branch history clean (one commit per updater run).
         # '--delete-branch' cleans up the ci/infra-update-* branch after merge.
@@ -160,6 +175,20 @@ jobs:
             --subject "ci: infra files update (auto-merge)"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post auto-merge triggered comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          if [[ "${{ steps.merge.outcome }}" == "success" ]]; then
+            body="🔀 Auto-merge triggered — ${run_link} \`${timestamp}\`"
+          else
+            body="⚠️ Auto-merge step failed — ${run_link} \`${timestamp}\`"
+          fi
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
 
   # ── Cleanup (always) ──────────────────────────────────────────────────────────
   # Deletes the ci/infra-update-* branch after the PR is merged, whether the
@@ -176,10 +205,12 @@ jobs:
       startsWith(github.head_ref, 'ci/infra-update-')
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
 
       - name: Delete branch ${{ github.head_ref }}
+        id: delete-branch
         run: |
           gh api \
             --method DELETE \
@@ -187,3 +218,13 @@ jobs:
             || echo "Branch already deleted (auto-merge may have removed it)"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post branch cleanup comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          body="🧹 Branch \`${{ github.head_ref }}\` deleted — ${run_link} \`${timestamp}\`"
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
