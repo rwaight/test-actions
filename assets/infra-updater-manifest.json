@@ -1,17 +1,17 @@
 {
-  "source_sha": "7e8f028",
-  "source_run_id": "27297939389",
-  "generated_at": "2026-06-10T18:39:55Z",
+  "source_sha": "97ab224",
+  "source_run_id": "27312933538",
+  "generated_at": "2026-06-10T23:27:13Z",
   "file_count": 2,
   "deleted_count": 0,
   "files": [
     {
-      "path": "assets/labels/README.md",
-      "sha256": "f5e8a26fdfa926a70ddb8bf4d29bebcfcb0e25c6588b6adae75beda1723200c6"
+      "path": ".github/labeler.yml",
+      "sha256": "20e71a033dbcc8308d9b6a9f2d0f8ffa768e73ef31c9dda0febcca8c4ae90553"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "1a406c309e7f7f7d5aa01ddddf69ec68077bae025e8cc314826c06f1f2375290"
+      "sha256": "c3b1b3d96ec5bd91fa92dfa01fb34ee9d99eb04e56e1f393c19436d1da6ae3df"
     }
   ]
 }
