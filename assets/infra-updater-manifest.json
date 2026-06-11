@@ -1,37 +1,41 @@
 {
-  "source_sha": "9a0f12b",
-  "source_run_id": "27357691878",
-  "generated_at": "2026-06-11T15:24:03Z",
-  "file_count": 7,
+  "source_sha": "d1c26a4",
+  "source_run_id": "27363474667",
+  "generated_at": "2026-06-11T16:58:54Z",
+  "file_count": 8,
   "deleted_count": 0,
   "files": [
     {
+      "path": ".github/workflows/source_README.md.j2",
+      "sha256": "b36143a15a658cc2d848bd7ebe342d665053b97229d14173afe9e96ba4173bcc"
+    },
+    {
+      "path": "assets/labels/my-labels-actions.yml",
+      "sha256": "60774a6b90ff7bf98742e62882077c3e14ebfff4b9d3396e4f38ca2e5c103923"
+    },
+    {
+      "path": "assets/labels/my-labels-core.yml",
+      "sha256": "e6c4bc26b8a6cc68f8a2a762594b1eabae6ff87e2e75c3e92825881a0e4b90f5"
+    },
+    {
+      "path": "assets/labels/my-labels-versioning.yml",
+      "sha256": "33f9fe88b81eabc427006327cdda1a51304cb83dabfebb528988d8145e907149"
+    },
+    {
+      "path": "assets/labels/source_README.md.j2",
+      "sha256": "74048a7e7f98ca5274a3b8dfa7c9cf610da36d64edd6dfd9fb62cbb8f74d64e0"
+    },
+    {
       "path": "assets/last-updated.txt",
-      "sha256": "4c05b830ef55f0d56ae991924c2dbfd35aef32580250c31fe4bc56c06106151d"
+      "sha256": "8fed8658ee0e4485722a3d425ac456d1501d813efe041703345a4c1f522682ea"
     },
     {
-      "path": "assets/pr-labeler/comment-checks-failure.md",
-      "sha256": "dc1e6600de87181e08d222e41b91ad75e8d5199c8b51fdd0ad6597c3fe8cc4f7"
+      "path": "assets/pr-labeler/source_README.md.j2",
+      "sha256": "657d34c9c640d3cb161d1fa9ddf801c6ae2bac29873b0e7ebfbbcfa03ffd4fe1"
     },
     {
-      "path": "assets/pr-labeler/comment-checks-success.md",
-      "sha256": "1c5dbdce0600e1d6e843323a402d1d001bf03dcb133d959e2bd46cc8a00cbcb0"
-    },
-    {
-      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
-      "sha256": "973d831553605416e0daa4fc6e9917065fcd11c4789c512431a256da78e9a4fc"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
-      "sha256": "c302165977bf5cc43cf9e67d178d12808f52d99ec13c82616ecf4985c74349bc"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-merge.md",
-      "sha256": "0edc239eaa890a13c6cec12a09774ffd7a2d9f8c7bd4e675627a6c3192318853"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-validate.md",
-      "sha256": "72c029ec1950df0a4d233ad7b410aa6493fefd06c1e5b1c7624dbe67a42352cf"
+      "path": "assets/validate-infra-pr/source_README.md.j2",
+      "sha256": "6f11c1ae25eb1f5a1903cbeddce5440947282da7adda9d367ee8c17ce37e038c"
     }
   ]
 }
