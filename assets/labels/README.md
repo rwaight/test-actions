@@ -2,13 +2,13 @@
 
 This folder contains label configuration files used in GitHub automations.
 
-The following label asset files are sourced from the 'infra' repo in the `infra/assets/labels/` directory:
+The following label asset files are sourced from the 'infra' repo in the `infra/file-sync/labels/` directory:
 
 ```bash
 ./labels/
-├── my-labels-actions.yml
-├── my-labels-core.yml
-└── my-labels-versioning.yml
+├── my-labels-actions.yml.j2
+├── my-labels-core.yml.j2
+└── my-labels-versioning.yml.j2
 ```
 
 ## Use of the label configuration files
