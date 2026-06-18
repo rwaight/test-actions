@@ -1,41 +1,25 @@
 {
-  "source_sha": "d1c26a4",
-  "source_run_id": "27363474667",
-  "generated_at": "2026-06-11T16:58:54Z",
-  "file_count": 8,
+  "source_sha": "96bfcf9",
+  "source_run_id": "27782258534",
+  "generated_at": "2026-06-18T18:55:44Z",
+  "file_count": 4,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/workflows/source_README.md.j2",
-      "sha256": "b36143a15a658cc2d848bd7ebe342d665053b97229d14173afe9e96ba4173bcc"
+      "path": ".github/workflows/label-manager.yml",
+      "sha256": "8fc92740fd44fd8e221a1cec992d04b80e47e66956194633bd122bce87702373"
     },
     {
-      "path": "assets/labels/my-labels-actions.yml",
-      "sha256": "60774a6b90ff7bf98742e62882077c3e14ebfff4b9d3396e4f38ca2e5c103923"
-    },
-    {
-      "path": "assets/labels/my-labels-core.yml",
-      "sha256": "e6c4bc26b8a6cc68f8a2a762594b1eabae6ff87e2e75c3e92825881a0e4b90f5"
-    },
-    {
-      "path": "assets/labels/my-labels-versioning.yml",
-      "sha256": "33f9fe88b81eabc427006327cdda1a51304cb83dabfebb528988d8145e907149"
+      "path": "assets/labels/my-labels-custom.yml",
+      "sha256": "cf76eb6f878a3cf54c15e8cbd9bfc6df0501e68f946c149d8f898a38ad4bb1d3"
     },
     {
       "path": "assets/labels/source_README.md.j2",
-      "sha256": "74048a7e7f98ca5274a3b8dfa7c9cf610da36d64edd6dfd9fb62cbb8f74d64e0"
+      "sha256": "a6b2e5b857f32337b2b2183c6500f034d79e13c00270e2667e830372d546f9b7"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "8fed8658ee0e4485722a3d425ac456d1501d813efe041703345a4c1f522682ea"
-    },
-    {
-      "path": "assets/pr-labeler/source_README.md.j2",
-      "sha256": "657d34c9c640d3cb161d1fa9ddf801c6ae2bac29873b0e7ebfbbcfa03ffd4fe1"
-    },
-    {
-      "path": "assets/validate-infra-pr/source_README.md.j2",
-      "sha256": "6f11c1ae25eb1f5a1903cbeddce5440947282da7adda9d367ee8c17ce37e038c"
+      "sha256": "bec02ce1f98aec7819251e7a1c4794dd992a13e021b1eaaadd42fb367f0795e1"
     }
   ]
 }
