@@ -147,11 +147,11 @@ jobs:
         with:
           config-file: |
             assets/labels/my-labels-core.yml
-            assets/labels/my-labels-actions.yml
+            assets/labels/my-labels-custom.yml
             assets/labels/my-labels-versioning.yml
           ## use the repo's local labels in the 'assets/' directory
           ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
-          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-custom.yml
           ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
           ## #
           ## # The 'request-token' parameter is needed so the remote config-file values can be accessed
