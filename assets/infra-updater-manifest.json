@@ -1,25 +1,28 @@
 {
-  "source_sha": "96bfcf9",
-  "source_run_id": "27782258534",
-  "generated_at": "2026-06-18T18:55:44Z",
-  "file_count": 4,
-  "deleted_count": 0,
+  "source_sha": "98539a3",
+  "source_run_id": "27783595533",
+  "generated_at": "2026-06-18T19:20:04Z",
+  "file_count": 1,
+  "deleted_count": 3,
   "files": [
     {
-      "path": ".github/workflows/label-manager.yml",
-      "sha256": "8fc92740fd44fd8e221a1cec992d04b80e47e66956194633bd122bce87702373"
-    },
-    {
-      "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "cf76eb6f878a3cf54c15e8cbd9bfc6df0501e68f946c149d8f898a38ad4bb1d3"
-    },
-    {
       "path": "assets/labels/source_README.md.j2",
-      "sha256": "a6b2e5b857f32337b2b2183c6500f034d79e13c00270e2667e830372d546f9b7"
+      "sha256": null,
+      "deleted": true
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "bec02ce1f98aec7819251e7a1c4794dd992a13e021b1eaaadd42fb367f0795e1"
+      "sha256": "cde22422cef17c04f4e6ad313d14aa0c678dd967b2f3cf572869e8110a829292"
+    },
+    {
+      "path": "assets/pr-labeler/source_README.md.j2",
+      "sha256": null,
+      "deleted": true
+    },
+    {
+      "path": "assets/validate-infra-pr/source_README.md.j2",
+      "sha256": null,
+      "deleted": true
     }
   ]
 }
