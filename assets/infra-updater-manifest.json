@@ -1,28 +1,22 @@
 {
-  "source_sha": "98539a3",
-  "source_run_id": "27783595533",
-  "generated_at": "2026-06-18T19:20:04Z",
-  "file_count": 1,
-  "deleted_count": 3,
+  "source_sha": "22d9a4e",
+  "source_run_id": "27983124020",
+  "generated_at": "2026-06-22T20:52:15Z",
+  "file_count": 2,
+  "deleted_count": 1,
   "files": [
     {
-      "path": "assets/labels/source_README.md.j2",
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "4e8b1409589ca664dfb3cfceb59fb259652c41430eb7024d0d3e7d6880a9121c"
+    },
+    {
+      "path": ".github/workflows/source_README.md.j2",
       "sha256": null,
       "deleted": true
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "cde22422cef17c04f4e6ad313d14aa0c678dd967b2f3cf572869e8110a829292"
-    },
-    {
-      "path": "assets/pr-labeler/source_README.md.j2",
-      "sha256": null,
-      "deleted": true
-    },
-    {
-      "path": "assets/validate-infra-pr/source_README.md.j2",
-      "sha256": null,
-      "deleted": true
+      "sha256": "ccc7f80a0633513937c64f2bd0ee4b94b6f183ebe49ab30aa1fdb3a853aa3a43"
     }
   ]
 }
