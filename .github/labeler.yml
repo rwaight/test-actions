@@ -10,28 +10,33 @@ actions:dependabot:
 - any:
   - head-branch: ['^dependabot','dependabot']
 
+# Add 'documentation' label to any file changes within 'docs' or 'examples' folders
 documentation:
 - all:
   - changed-files:
     - any-glob-to-any-file: ['**/*.md','**/docs/*','docs/**','examples/**']
     - all-globs-to-all-files: '!CHANGELOG.md'
 
+# Add 'impacts:assets' label to any file changes within the 'assets' folder or 'infra/file-sync' folder
 impacts:assets:
 - any:
   - changed-files:
     - any-glob-to-any-file: ['assets/**', 'infra/file-sync/**']
 
+# Add 'impacts:infra' label to any file changes within the 'infra' folder
 impacts:infra:
 - any:
   - changed-files:
     - any-glob-to-any-file: 'infra/**'
 
+# Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:
 - all:
   - changed-files:
     - any-glob-to-any-file: '.github/**'
     - all-globs-to-all-files: '!.github/workflows/**'
 
+# Add 'impacts:workflows' label to any file changes within the '.github/workflows' folder
 impacts:workflows:
 - any:
   - changed-files:

@@ -1,22 +1,21 @@
 {
-  "source_sha": "22d9a4e",
-  "source_run_id": "27983124020",
-  "generated_at": "2026-06-22T20:52:15Z",
-  "file_count": 2,
-  "deleted_count": 1,
+  "source_sha": "ed1961b",
+  "source_run_id": "27986438066",
+  "generated_at": "2026-06-22T21:52:31Z",
+  "file_count": 3,
+  "deleted_count": 0,
   "files": [
     {
-      "path": ".github/PULL_REQUEST_TEMPLATE.md",
-      "sha256": "4e8b1409589ca664dfb3cfceb59fb259652c41430eb7024d0d3e7d6880a9121c"
+      "path": ".github/README_gh-configs.md",
+      "sha256": "a2fd904b2219c3fd458d4b5ea277a41a6da362cccfbefaad66bf40a3701a6cbe"
     },
     {
-      "path": ".github/workflows/source_README.md.j2",
-      "sha256": null,
-      "deleted": true
+      "path": ".github/labeler.yml",
+      "sha256": "74d87c140214df8a05a9a17598a5b915869ffea646c8a4cfa78434726c59d191"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "ccc7f80a0633513937c64f2bd0ee4b94b6f183ebe49ab30aa1fdb3a853aa3a43"
+      "sha256": "5bbc6bbe8d694836b3e5c6c00a54e53d26f10102f789202b1652df107682ac75"
     }
   ]
 }
