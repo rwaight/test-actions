@@ -1,18 +1,17 @@
 {
-  "source_sha": "b4caab1",
-  "source_run_id": "28000039802",
-  "generated_at": "2026-06-23T03:27:52Z",
-  "file_count": 1,
-  "deleted_count": 1,
+  "source_sha": "da6c3bd",
+  "source_run_id": "28002467291",
+  "generated_at": "2026-06-23T04:36:46Z",
+  "file_count": 2,
+  "deleted_count": 0,
   "files": [
     {
-      "path": ".github/ISSUE_TEMPLATE/other.yml",
-      "sha256": null,
-      "deleted": true
+      "path": ".github/CODEOWNERS",
+      "sha256": "45de6240f10ad74444047183b2bb72987434ba0934d659f2e4220eca4c870a16"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "a8d5f412632db60893b2879cfff6a0dc0c518412d1e2da8ebebd4122a2b0070c"
+      "sha256": "6ab113a71482c172844f5efc2edd07e7085454bea23293fe336e20bea000ac8a"
     }
   ]
 }
