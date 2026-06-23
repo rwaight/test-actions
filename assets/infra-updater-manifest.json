@@ -1,29 +1,29 @@
 {
-  "source_sha": "56931f6",
-  "source_run_id": "28003545291",
-  "generated_at": "2026-06-23T05:06:24Z",
+  "source_sha": "8786f87",
+  "source_run_id": "28052087721",
+  "generated_at": "2026-06-23T19:41:02Z",
   "file_count": 5,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/labeler.yml",
-      "sha256": "4a96e73715ffaceef524678884fa330e62b9b7e0a189f7107fcdffa06cc461a9"
-    },
-    {
-      "path": "assets/labels/my-labels-core.yml",
-      "sha256": "2600068bb8bd0695bea965c0dcec4d86c86c438ae958895fe4871dd8ff0a20ac"
-    },
-    {
       "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "41b4bbf8f05e9f6504e94d59d94f103680cade6c59814817ed00f59e7c5c12a4"
-    },
-    {
-      "path": "assets/labels/my-labels-versioning.yml",
-      "sha256": "acaea30eba635b611508b699222bf8f4cebaf59a53ab87c9658f30318fd485d3"
+      "sha256": "0d56f9c0ad52f09453cab98e3304c51ca78dde8cbd67fe928ed193a9495cdbd6"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "bf7e0a4626d39fc86deb6717cff9a1c17da45cc5777adc9a73d0958b98d64c38"
+      "sha256": "870d1c4f62eaa3e8feef4d4ed9a558d16e432b9c57b06cf8b3db9772e371c706"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
+      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-merge.md",
+      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-validate.md",
+      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
     }
   ]
 }
