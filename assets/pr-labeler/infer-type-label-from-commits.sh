@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 # infer-type-label-from-commits.sh — infer and validate PR type: label from commit messages
 #
