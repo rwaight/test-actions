@@ -1,29 +1,18 @@
 {
-  "source_sha": "8c703a5",
-  "source_run_id": "27999038215",
-  "generated_at": "2026-06-23T02:59:40Z",
-  "file_count": 5,
-  "deleted_count": 0,
+  "source_sha": "b4caab1",
+  "source_run_id": "28000039802",
+  "generated_at": "2026-06-23T03:27:52Z",
+  "file_count": 1,
+  "deleted_count": 1,
   "files": [
     {
-      "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "4b80bff8e655472c9e3d95abe5891d58e659b32a644855d6a5f61307f16b6f7e"
+      "path": ".github/ISSUE_TEMPLATE/other.yml",
+      "sha256": null,
+      "deleted": true
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "aa71a6572c11d491e68990b2c1bfb5b0d3b3b8d7729f72e54249f721fc6b6d7b"
-    },
-    {
-      "path": "assets/pr-labeler/comment-checks-failure.md",
-      "sha256": "155a4774c17a47e9fbaff0ac655f7019dd18d8991e225449bd7d7cc9bdb307f0"
-    },
-    {
-      "path": "assets/pr-labeler/comment-checks-success.md",
-      "sha256": "2b00d5725717ea9919838beae9982f2a0e4d5994afdb248040d3457fee1a3eea"
-    },
-    {
-      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
-      "sha256": "39bd64a36b4e3ecf89679666800fb628fedf1d6d7f1cedba8c998872252e2d1e"
+      "sha256": "a8d5f412632db60893b2879cfff6a0dc0c518412d1e2da8ebebd4122a2b0070c"
     }
   ]
 }
