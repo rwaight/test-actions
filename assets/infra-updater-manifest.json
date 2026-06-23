@@ -1,21 +1,29 @@
 {
-  "source_sha": "ed1961b",
-  "source_run_id": "27986438066",
-  "generated_at": "2026-06-22T21:52:31Z",
-  "file_count": 3,
+  "source_sha": "8c703a5",
+  "source_run_id": "27999038215",
+  "generated_at": "2026-06-23T02:59:40Z",
+  "file_count": 5,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/README_gh-configs.md",
-      "sha256": "a2fd904b2219c3fd458d4b5ea277a41a6da362cccfbefaad66bf40a3701a6cbe"
-    },
-    {
-      "path": ".github/labeler.yml",
-      "sha256": "74d87c140214df8a05a9a17598a5b915869ffea646c8a4cfa78434726c59d191"
+      "path": "assets/labels/my-labels-custom.yml",
+      "sha256": "4b80bff8e655472c9e3d95abe5891d58e659b32a644855d6a5f61307f16b6f7e"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "5bbc6bbe8d694836b3e5c6c00a54e53d26f10102f789202b1652df107682ac75"
+      "sha256": "aa71a6572c11d491e68990b2c1bfb5b0d3b3b8d7729f72e54249f721fc6b6d7b"
+    },
+    {
+      "path": "assets/pr-labeler/comment-checks-failure.md",
+      "sha256": "155a4774c17a47e9fbaff0ac655f7019dd18d8991e225449bd7d7cc9bdb307f0"
+    },
+    {
+      "path": "assets/pr-labeler/comment-checks-success.md",
+      "sha256": "2b00d5725717ea9919838beae9982f2a0e4d5994afdb248040d3457fee1a3eea"
+    },
+    {
+      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
+      "sha256": "39bd64a36b4e3ecf89679666800fb628fedf1d6d7f1cedba8c998872252e2d1e"
     }
   ]
 }
