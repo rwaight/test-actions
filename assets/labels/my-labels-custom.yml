@@ -1,8 +1,5 @@
 ## Custom GitHub Labels
 ##
-## This file is sourced from the 'infra' repo, the file location is: 
-## 'infra/file-sync/assets/labels/my-labels-custom.yml.j2'
-##
 ## Conditionals control which labels appear in which repos.
 ## The 'repo:managed' label appears in ALL repos to prevent empty files.
 ##

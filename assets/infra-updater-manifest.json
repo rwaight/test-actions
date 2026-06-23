@@ -1,17 +1,29 @@
 {
-  "source_sha": "bd4b77d",
-  "source_run_id": "28003046695",
-  "generated_at": "2026-06-23T04:53:09Z",
-  "file_count": 2,
+  "source_sha": "56931f6",
+  "source_run_id": "28003545291",
+  "generated_at": "2026-06-23T05:06:24Z",
+  "file_count": 5,
   "deleted_count": 0,
   "files": [
     {
-      "path": "assets/last-updated.txt",
-      "sha256": "4c9d5eb0e27c53f11d59892ab86a96b4fce7867efcd073ccabf4cf1445ca4246"
+      "path": ".github/labeler.yml",
+      "sha256": "4a96e73715ffaceef524678884fa330e62b9b7e0a189f7107fcdffa06cc461a9"
     },
     {
-      "path": "commitlint.config.js",
-      "sha256": "361928fc0fa36a80e33f92ebc067bb419fe6aa648b29074bfb99b2a5b12a9da7"
+      "path": "assets/labels/my-labels-core.yml",
+      "sha256": "2600068bb8bd0695bea965c0dcec4d86c86c438ae958895fe4871dd8ff0a20ac"
+    },
+    {
+      "path": "assets/labels/my-labels-custom.yml",
+      "sha256": "41b4bbf8f05e9f6504e94d59d94f103680cade6c59814817ed00f59e7c5c12a4"
+    },
+    {
+      "path": "assets/labels/my-labels-versioning.yml",
+      "sha256": "acaea30eba635b611508b699222bf8f4cebaf59a53ab87c9658f30318fd485d3"
+    },
+    {
+      "path": "assets/last-updated.txt",
+      "sha256": "bf7e0a4626d39fc86deb6717cff9a1c17da45cc5777adc9a73d0958b98d64c38"
     }
   ]
 }
