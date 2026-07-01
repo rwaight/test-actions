@@ -1,29 +1,37 @@
 {
-  "source_sha": "8786f87",
-  "source_run_id": "28052087721",
-  "generated_at": "2026-06-23T19:41:02Z",
-  "file_count": 5,
+  "source_sha": "0dd860d",
+  "source_run_id": "28531369750",
+  "generated_at": "2026-07-01T16:11:57Z",
+  "file_count": 7,
   "deleted_count": 0,
   "files": [
     {
-      "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "0d56f9c0ad52f09453cab98e3304c51ca78dde8cbd67fe928ed193a9495cdbd6"
+      "path": ".github/copilot-instructions.md",
+      "sha256": "d49eef52f257da05dc45cc1fd580a4a194f2174374ba1db99d1b2b1fab216cb9"
+    },
+    {
+      "path": ".github/workflows/check-commits.yml",
+      "sha256": "18b65e48283f49d77012ccef3b30e4c1a039f3f74c6745c596935749d910fe51"
+    },
+    {
+      "path": ".github/workflows/label-manager.yml",
+      "sha256": "643167dba1b799c6a52ed29d9053559feea3e68fb45a1632eef11814e7e08fdc"
+    },
+    {
+      "path": ".github/workflows/pr-labeler.yml",
+      "sha256": "07526c96aa9026b1e54d2c9910a5216d417b59683a148f877dc9db4d4fc72c53"
+    },
+    {
+      "path": ".github/workflows/triage-stale.yml",
+      "sha256": "d73564dbb31236e58212c533ab275fdeb4eac3b01a2ce2f424dc49ec3769a65f"
+    },
+    {
+      "path": ".github/workflows/validate-infra-pr.yml",
+      "sha256": "23be367a6f343b859e68f16f0997c82e10d1a9a5ec5cae9385cdf91e03ff56bf"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "870d1c4f62eaa3e8feef4d4ed9a558d16e432b9c57b06cf8b3db9772e371c706"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
-      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-merge.md",
-      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-validate.md",
-      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
+      "sha256": "acbac6d5f0c21d22794928694684b51fef942238420f8c9a4b40eca79d1b6c93"
     }
   ]
 }
