@@ -148,6 +148,7 @@ jobs:
   not-repo-owner:
     #name: Exit on forked repo
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     if: (github.repository_owner != 'rwaight')
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}

@@ -1,37 +1,17 @@
 {
-  "source_sha": "0dd860d",
-  "source_run_id": "28531369750",
-  "generated_at": "2026-07-01T16:11:57Z",
-  "file_count": 7,
+  "source_sha": "de1761a",
+  "source_run_id": "28539426528",
+  "generated_at": "2026-07-01T18:35:50Z",
+  "file_count": 2,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/copilot-instructions.md",
-      "sha256": "d49eef52f257da05dc45cc1fd580a4a194f2174374ba1db99d1b2b1fab216cb9"
-    },
-    {
       "path": ".github/workflows/check-commits.yml",
-      "sha256": "18b65e48283f49d77012ccef3b30e4c1a039f3f74c6745c596935749d910fe51"
-    },
-    {
-      "path": ".github/workflows/label-manager.yml",
-      "sha256": "643167dba1b799c6a52ed29d9053559feea3e68fb45a1632eef11814e7e08fdc"
-    },
-    {
-      "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "07526c96aa9026b1e54d2c9910a5216d417b59683a148f877dc9db4d4fc72c53"
-    },
-    {
-      "path": ".github/workflows/triage-stale.yml",
-      "sha256": "d73564dbb31236e58212c533ab275fdeb4eac3b01a2ce2f424dc49ec3769a65f"
-    },
-    {
-      "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "23be367a6f343b859e68f16f0997c82e10d1a9a5ec5cae9385cdf91e03ff56bf"
+      "sha256": "c2b3ae32ec27305a26357d4c470fd0db04930c65650a79325f12fd1f452e6f53"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "acbac6d5f0c21d22794928694684b51fef942238420f8c9a4b40eca79d1b6c93"
+      "sha256": "1ceadf9f827dac9c45727a99ca8e26b64a97eb4c3aed28f9976f7fe557dc6424"
     }
   ]
 }
