@@ -1,18 +1,29 @@
 {
-  "source_sha": "61cccf1",
-  "source_run_id": "28560748133",
-  "generated_at": "2026-07-02T02:19:20Z",
-  "file_count": 1,
-  "deleted_count": 1,
+  "source_sha": "9b269e8",
+  "source_run_id": "28980959280",
+  "generated_at": "2026-07-08T22:46:44Z",
+  "file_count": 5,
+  "deleted_count": 0,
   "files": [
     {
-      "path": ".github/copilot-instructions.md",
-      "sha256": null,
-      "deleted": true
+      "path": ".github/workflows/check-commits.yml",
+      "sha256": "de1dd4698cdd7825f004ba7cbb6551caeb286ee0aae1010e73765b558aa05d58"
+    },
+    {
+      "path": ".github/workflows/label-manager.yml",
+      "sha256": "d760355d39983c4bbe9a21891c2d975ca1b8c97f927b660f032900d0ac72517f"
+    },
+    {
+      "path": ".github/workflows/pr-labeler.yml",
+      "sha256": "e8d9a549377f84555444ee4613f5e410d6dc1866d941c9fb3edcaa43fe61dbb4"
+    },
+    {
+      "path": ".github/workflows/validate-infra-pr.yml",
+      "sha256": "c798f7dd788e9d7b53860e6a5f13d6fcd45315ef4fa5db092f651a3d45aa9ab0"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "a89c1967d025f62152434a90fed4b98f1f1c2038f254e7c9aa570807a4b07ae7"
+      "sha256": "53130f9d27021cd1e0068a69b0bbf50dbc2e15e8e6b7838f1fbe009c1c297a73"
     }
   ]
 }
