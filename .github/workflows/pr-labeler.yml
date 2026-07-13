@@ -1,5 +1,6 @@
 # This workflow currently runs the 'pr-labeler' action
 # This file is sourced from the 'infra' repo, the file location is: 'infra/file-sync/gh_workflows/pr-labeler.yml'
+# Track 1b verification (BP-323) — harmless comment; remove when closing BP-323
 
 name: PR Labeler
 run-name: Label PR ${{ github.event.number }} on ${{ github.head_ref || github.ref_name }}
