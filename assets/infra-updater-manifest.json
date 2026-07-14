@@ -1,26 +1,22 @@
 {
-  "source_sha": "bfeadb3",
-  "source_run_id": "29305051118",
-  "generated_at": "2026-07-14T04:05:51Z",
-  "file_count": 4,
+  "source_sha": "8d32b3a",
+  "source_run_id": "29306284772",
+  "generated_at": "2026-07-14T04:35:17Z",
+  "file_count": 3,
   "deleted_count": 0,
   "files": [
     {
       "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "e8d9a549377f84555444ee4613f5e410d6dc1866d941c9fb3edcaa43fe61dbb4"
+      "sha256": "4ee074744c3eb769d8a3c33705883c5a9544d0a8ffb00bd1ac3bcb9d8190ed65"
     },
     {
-      "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "492c5e1810e32d0ca621758e1137d33908d687daf8129f4f6ef86f6c732eb267"
+      "path": ".github/workflows/triage-stale.yml",
+      "sha256": "e24b768a4bfcd68b950d1356b78e4daab14e76bf2d9983207fe52d3c5746b6b5"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "5a3bdb365be66cea616b62043528595ac1597d501801205cc339bd968afea97d"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-merge-suppressed.md",
-      "sha256": "aca637874535a5b59c5ac3d058a51bcbe2ab49192624302074e5441677f40209"
+      "sha256": "29cacf5a374a33b1f26dd399aa2876e12b26e83b2d9a3c5cc385006985b3930e"
     }
   ],
-  "updater_version": "2.1.3"
+  "updater_version": "2.1.4"
 }
