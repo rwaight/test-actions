@@ -16,3 +16,5 @@ this is a test
 <!-- throwaway p0.1 pr-labeler rollout check; do not merge -->
 
 <!-- second commit: synchronize supersede check -->
+
+<!-- third commit: pending-work vs bot-labeled isolation -->
